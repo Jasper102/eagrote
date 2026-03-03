@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EAGROTE | Official Cloud Hub</title>
 
-    <!-- [重要] 請將您 Firebase 控制台的內容貼在此處 -->
+    <!-- Firebase 配置 -->
     <script>
         window.firebaseConfig = {
             apiKey: "AIzaSyAooeR583cIaLrz_YR7ubwvANQLAIVAxjI",
@@ -18,44 +18,74 @@
     </script>
 
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700;900&family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Noto Sans TC', sans-serif; background-color: #000; color: #fff; scroll-behavior: smooth; overflow-x: hidden; }
-        .gold-gradient { background: linear-gradient(135deg, #d4af37 0%, #f9e498 50%, #d4af37 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .bg-gold { background: linear-gradient(135deg, #d4af37 0%, #f9e498 100%); }
+        .font-montserrat { font-family: 'Montserrat', sans-serif; }
+        
+        .gold-gradient { 
+            background: linear-gradient(135deg, #BF953F 0%, #FCF6BA 25%, #B38728 50%, #FBF5B7 75%, #AA771C 100%);
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+        }
+        
+        .bg-gold { background: linear-gradient(135deg, #BF953F, #FCF6BA, #AA771C); }
         .admin-only { display: none; }
         .error-box { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #ef4444; padding: 15px; border-radius: 12px; margin-top: 20px; font-size: 13px; display: none; }
         
-        /* Logo 動畫 */
-        .logo-hover:hover .eagle-wing { transform: translateY(-2px) scale(1.05); transition: 0.3s; }
-        
-        /* 背景裝飾 */
-        .glow-bg { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 100%; height: 600px; background: radial-gradient(circle at center, rgba(212, 175, 55, 0.08) 0%, transparent 70%); z-index: -1; pointer-events: none; }
+        .glow-bg { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 100%; height: 600px; background: radial-gradient(circle at center, rgba(191, 149, 63, 0.1) 0%, transparent 70%); z-index: -1; pointer-events: none; }
+
+        /* 照片點開後的放大燈箱效果 */
+        #lightbox {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 200;
+            cursor: zoom-out;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            padding: 20px;
+        }
+        #lightbox img {
+            max-width: 95%;
+            max-height: 95%;
+            border-radius: 8px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            transform: scale(0.9);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        #lightbox.active { display: flex; }
+        #lightbox.active img { transform: scale(1); }
+
+        /* 按鈕特殊樣式 */
+        .sort-btn {
+            transition: all 0.3s ease;
+            border: 1px solid rgba(191, 149, 63, 0.3);
+        }
+        .sort-btn:hover {
+            border-color: rgba(191, 149, 63, 1);
+            background: rgba(191, 149, 63, 0.1);
+        }
     </style>
 </head>
 <body>
 
     <div class="glow-bg"></div>
 
+    <!-- 圖片放大燈箱 -->
+    <div id="lightbox" onclick="window.closeLightbox()">
+        <img id="lightbox-img" src="" alt="Enlarged view">
+    </div>
+
     <!-- 導覽列 -->
     <nav class="fixed w-full z-50 bg-black/80 border-b border-white/5 backdrop-blur-xl">
         <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="flex items-center gap-3 logo-hover cursor-pointer" onclick="window.scrollTo({top:0, behavior:'smooth'})">
-                <!-- SVG Eagle Logo -->
-                <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path class="eagle-wing" d="M10 40C30 35 45 45 50 60C55 45 70 35 90 40C80 60 65 75 50 85C35 75 20 60 10 40Z" fill="url(#gold_grad)" />
-                    <path d="M50 20L55 35H45 L50 20Z" fill="#f9e498" />
-                    <defs>
-                        <linearGradient id="gold_grad" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
-                            <stop stop-color="#d4af37"/>
-                            <stop offset="0.5" stop-color="#f9e498"/>
-                            <stop offset="1" stop-color="#d4af37"/>
-                        </linearGradient>
-                    </defs>
-                </svg>
-                <span class="text-2xl font-black tracking-[0.2em] gold-gradient">EAGROTE</span>
+            <div class="flex items-center cursor-pointer" onclick="window.scrollTo({top:0, behavior:'smooth'})">
+                <span class="text-2xl font-black font-montserrat tracking-[0.25em] gold-gradient">EAGROTE</span>
             </div>
-            <button onclick="window.openLogin()" class="text-zinc-500 hover:text-yellow-500 transition-all uppercase text-[10px] tracking-[0.3em] font-bold border border-white/10 px-4 py-2 rounded-full hover:bg-white/5">
+            <button onclick="window.openLogin()" class="text-zinc-500 hover:text-white transition-all uppercase text-[10px] tracking-[0.3em] font-bold border border-white/10 px-5 py-2 rounded-full hover:bg-white/5">
                 Authentication
             </button>
         </div>
@@ -67,38 +97,11 @@
             <div class="inline-block px-4 py-1 border border-yellow-500/30 rounded-full text-[10px] text-yellow-500 font-bold tracking-[0.4em] uppercase mb-8">
                 Official Digital Archive
             </div>
-            <h1 class="text-5xl md:text-8xl font-black mb-8 gold-gradient uppercase tracking-tighter leading-tight">力量 · 希望 · 不屈</h1>
+            <h1 class="text-5xl md:text-8xl font-black font-montserrat mb-8 gold-gradient uppercase tracking-tighter leading-tight">力量 · 希望 · 不屈</h1>
             <p class="text-zinc-500 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed font-light">
-                融合老鷹的遠大視野與科技的精準執行<br>
-                EAGROTE 為追求卓越與突破極限的追夢者而生
+                傳承鷹之意志，在雲端建立聖殿。<br>
+                EAGROTE 為追求卓越與突破極限的追夢者而生。
             </p>
-        </div>
-    </section>
-
-    <!-- 品牌精神 -->
-    <section class="py-20 px-6 bg-zinc-950/30">
-        <div class="max-w-6xl mx-auto grid md:grid-cols-3 gap-10">
-            <div class="p-10 bg-zinc-900/40 rounded-[2.5rem] border border-white/5 hover:border-yellow-500/20 transition-all">
-                <div class="w-12 h-12 bg-yellow-500/10 rounded-2xl flex items-center justify-center mb-6">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#d4af37" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-                </div>
-                <h3 class="text-white font-black text-xl mb-4 tracking-widest uppercase">遠大視野</h3>
-                <p class="text-zinc-500 text-sm leading-relaxed text-justify">如老鷹鎖定目標，在高空洞察一切機會與挑戰，不為眼前迷霧所惑。</p>
-            </div>
-            <div class="p-10 bg-zinc-900/40 rounded-[2.5rem] border border-white/5 hover:border-yellow-500/20 transition-all">
-                <div class="w-12 h-12 bg-yellow-500/10 rounded-2xl flex items-center justify-center mb-6">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#d4af37" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                </div>
-                <h3 class="text-white font-black text-xl mb-4 tracking-widest uppercase">精準執行</h3>
-                <p class="text-zinc-500 text-sm leading-relaxed text-justify">追求精密效率與技術革新，確保每一個環節都達到無懈可擊的巔峰。</p>
-            </div>
-            <div class="p-10 bg-zinc-900/40 rounded-[2.5rem] border border-white/5 hover:border-yellow-500/20 transition-all">
-                <div class="w-12 h-12 bg-yellow-500/10 rounded-2xl flex items-center justify-center mb-6">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#d4af37" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                </div>
-                <h3 class="text-white font-black text-xl mb-4 tracking-widest uppercase">永不放棄</h3>
-                <p class="text-zinc-500 text-sm leading-relaxed text-justify">擁抱堅韌不屈的靈魂，在逆境中逆風翱翔，為追隨者創造無限希望。</p>
-            </div>
         </div>
     </section>
 
@@ -121,71 +124,56 @@
                 <button id="upload-btn" onclick="window.upload()" class="w-full bg-gold text-black font-black py-5 rounded-2xl uppercase tracking-[0.3em] hover:scale-[1.01] active:scale-95 transition-all shadow-xl shadow-yellow-500/10">
                     同步至雲端伺服器
                 </button>
-
                 <div id="status-msg" class="text-center text-[10px] text-zinc-600 uppercase tracking-widest mt-4">System Ready</div>
             </div>
         </div>
 
-        <!-- 雲端紀錄列表 -->
-        <div class="flex items-center justify-between mb-12">
-            <h2 class="text-2xl font-black gold-gradient uppercase tracking-widest">Cloud Archive</h2>
-            <div class="h-px flex-1 bg-white/5 mx-6"></div>
-            <div class="text-zinc-800 text-[10px] uppercase font-bold tracking-widest">Database V3</div>
+        <!-- 雲端紀錄列表控制區 -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-6">
+            <div class="flex items-center gap-4">
+                <h2 class="text-2xl font-black font-montserrat gold-gradient uppercase tracking-widest whitespace-nowrap">Cloud Archive</h2>
+                <div class="h-px w-12 bg-white/10"></div>
+                <!-- 排序切換按鈕 -->
+                <button id="toggle-sort" onclick="window.toggleSort()" class="sort-btn px-4 py-1.5 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase text-yellow-500 flex items-center gap-2">
+                    <span id="sort-label">最早靠上</span>
+                    <svg id="sort-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg>
+                </button>
+            </div>
+            <div class="text-zinc-800 text-[10px] uppercase font-bold tracking-widest hidden md:block">Database Integrated</div>
         </div>
         
         <div id="error-display" class="error-box"></div>
         <div id="list" class="grid grid-cols-1 md:grid-cols-2 gap-10">
-            <!-- 動態載入 -->
+            <!-- 內容由 JavaScript 動態載入 -->
         </div>
     </section>
 
-    <!-- 團隊與創辦人 -->
-    <section class="py-32 px-6 bg-zinc-950/80 border-t border-white/5 relative">
+    <!-- 創辦人資訊區 -->
+    <section class="py-32 px-6 bg-zinc-950/80 border-t border-white/5">
         <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center gap-16">
-            <div class="relative group">
-                <div class="absolute inset-0 bg-gold blur-3xl opacity-10 group-hover:opacity-20 transition-opacity"></div>
-                <div class="w-48 h-48 bg-zinc-900 border border-white/10 rounded-[3rem] flex items-center justify-center text-6xl font-black text-white relative z-10 overflow-hidden">
-                    <span class="gold-gradient">LC</span>
-                </div>
+            <div class="w-48 h-48 bg-zinc-900 border border-white/10 rounded-[3rem] flex items-center justify-center relative overflow-hidden shadow-2xl">
+                <span class="text-6xl font-black gold-gradient font-montserrat">LC</span>
             </div>
             <div class="flex-1 text-center md:text-left">
-                <div class="inline-block px-3 py-1 bg-yellow-500/10 text-yellow-500 text-[10px] font-black tracking-widest uppercase rounded-full mb-6">Founder & CEO</div>
-                <h3 class="text-5xl font-black mb-6 gold-gradient tracking-tight">林新程 Jasper Lin</h3>
-                <div class="space-y-4 text-zinc-400 text-sm tracking-wide">
-                    <div class="flex items-center gap-3 justify-center md:justify-start">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                        <span>eagrote.tw@gmail.com</span>
-                    </div>
-                    <div class="flex items-center gap-3 justify-center md:justify-start">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
-                        <span>Jasperhclin</span>
-                    </div>
-                </div>
+                <div class="inline-block px-3 py-1 bg-yellow-500/10 text-yellow-500 text-[10px] font-black tracking-widest uppercase rounded-full mb-6">Founder</div>
+                <h3 class="text-5xl font-black gold-gradient tracking-tight mb-6">林新程 Jasper Lin</h3>
+                <p class="text-zinc-500 text-sm tracking-widest">eagrote.tw@gmail.com | IG: Jasperhclin</p>
             </div>
         </div>
     </section>
 
-    <!-- 頁尾 -->
     <footer class="py-16 text-center border-t border-white/5">
-        <div class="mb-6 opacity-30 flex justify-center">
-            <svg width="30" height="30" viewBox="0 0 100 100" fill="none">
-                <path d="M10 40C30 35 45 45 50 60C55 45 70 35 90 40C80 60 65 75 50 85C35 75 20 60 10 40Z" fill="#333" />
-            </svg>
-        </div>
-        <p class="text-zinc-700 text-[10px] tracking-[0.8em] uppercase font-bold">Persistence is the soul of EAGROTE</p>
-        <p class="text-zinc-800 text-[8px] mt-4 uppercase">© 2024 EAGROTE TEAM. ALL RIGHTS RESERVED.</p>
+        <p class="text-zinc-800 text-[8px] tracking-[1.2em] uppercase font-bold">Persistence is the soul of EAGROTE</p>
+        <p class="text-zinc-900 text-[7px] mt-4 uppercase tracking-widest">© 2024 EAGROTE TEAM. ALL RIGHTS RESERVED.</p>
     </footer>
 
     <!-- 驗證彈窗 -->
-    <div id="login-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/95 backdrop-blur-xl">
+    <div id="login-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/95 backdrop-blur-xl p-6">
         <div class="bg-zinc-950 p-12 rounded-[3.5rem] border border-white/10 w-full max-w-md text-center shadow-2xl">
-            <div class="mb-10">
-                <h3 class="gold-gradient text-xl font-black mb-2 uppercase tracking-[0.3em]">Access Security</h3>
-                <p class="text-zinc-600 text-xs uppercase tracking-widest">請輸入管理授權金鑰</p>
-            </div>
+            <h3 class="gold-gradient text-xl font-black mb-8 uppercase tracking-[0.3em]">Access Security</h3>
             <input type="password" id="admin-pass" class="w-full bg-black border border-zinc-900 p-5 rounded-2xl text-center text-white mb-8 outline-none focus:border-yellow-500/50 text-2xl tracking-[0.5em]" placeholder="••••••">
-            <button onclick="window.verify()" class="w-full bg-gold text-black font-black py-5 rounded-2xl uppercase tracking-widest shadow-lg active:scale-95 transition-all">Verify & Grant Access</button>
-            <button onclick="window.closeLogin()" class="mt-8 text-zinc-700 text-[10px] uppercase tracking-widest hover:text-zinc-400 transition-colors">Cancel</button>
+            <button onclick="window.verify()" class="w-full bg-gold text-black font-black py-5 rounded-2xl uppercase tracking-widest shadow-lg active:scale-95 transition-all">Verify Access</button>
+            <button onclick="window.closeLogin()" class="mt-8 text-zinc-700 text-[10px] uppercase tracking-widest hover:text-zinc-400">Cancel</button>
         </div>
     </div>
 
@@ -194,97 +182,126 @@
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        let db, auth, imgData = null, isAdmin = false, userReady = false;
+        let db, auth, imgData = null, isAdmin = false;
+        let sortOldestFirst = true; // 預設最早傳的靠上
+        let currentItems = [];
         const collectionPath = "eagrote_production_vault"; 
 
+        // 初始化 Firebase
         try {
             const app = initializeApp(window.firebaseConfig);
             auth = getAuth(app);
             db = getFirestore(app);
 
             onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    userReady = true;
-                    startRealtimeSync();
-                } else {
-                    signInAnonymously(auth).catch(e => showError("Auth Failed: " + e.code));
-                }
+                if (user) { startRealtimeSync(); } 
+                else { signInAnonymously(auth); }
             });
-        } catch (e) { showError("Initialization Error"); }
+        } catch (e) { showError("系統初始化失敗，請檢查網路連線。"); }
 
+        // 即時同步數據
         function startRealtimeSync() {
-            const q = collection(db, collectionPath);
-            onSnapshot(q, (snap) => {
-                const items = snap.docs.map(d => ({id: d.id, ...d.data()})).sort((a,b) => b.time - a.time);
-                window.render(items);
+            onSnapshot(collection(db, collectionPath), (snap) => {
+                currentItems = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                applySortAndRender();
                 document.getElementById('error-display').style.display = 'none';
             }, (err) => {
-                showError("同步異常 (Permission Denied): 請在 Firebase Console > Firestore > Rules 將規則設為 allow read, write: if true;");
+                showError("同步失敗: 請確認資料庫權限已開啟。");
             });
         }
 
+        // 切換排序邏輯
+        window.toggleSort = () => {
+            sortOldestFirst = !sortOldestFirst;
+            const label = document.getElementById('sort-label');
+            label.innerText = sortOldestFirst ? "最早靠上" : "最新靠上";
+            applySortAndRender();
+        };
+
+        function applySortAndRender() {
+            // 排序: a.time - b.time 是舊到新 (最早靠上)
+            // b.time - a.time 是新到舊 (最新靠上)
+            const sorted = [...currentItems].sort((a, b) => {
+                return sortOldestFirst ? a.time - b.time : b.time - a.time;
+            });
+            render(sorted);
+        }
+
+        // 燈箱放大功能
+        window.openLightbox = (src) => {
+            const lb = document.getElementById('lightbox');
+            const lbImg = document.getElementById('lightbox-img');
+            lbImg.src = src;
+            lb.classList.add('active');
+            document.body.style.overflow = 'hidden'; 
+        };
+
+        window.closeLightbox = () => {
+            const lb = document.getElementById('lightbox');
+            lb.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        };
+
+        // 圖片處理 (壓縮至 JPEG 0.7)
         window.processImg = (input) => {
             const file = input.files[0];
             if (!file) return;
-            document.getElementById('file-label').innerText = "優化數據中...";
+            document.getElementById('file-label').innerText = "數據處理中...";
             const reader = new FileReader();
             reader.onload = (e) => {
                 const img = new Image();
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
-                    const targetSize = 800; 
+                    const targetSize = 1080; 
                     let w = img.width, h = img.height;
                     if (w > h) { h = (targetSize/w)*h; w = targetSize; } else { w = (targetSize/h)*w; h = targetSize; }
                     canvas.width = w; canvas.height = h;
                     canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                    imgData = canvas.toDataURL('image/jpeg', 0.5); 
+                    imgData = canvas.toDataURL('image/jpeg', 0.7); 
                     document.getElementById('file-label').innerText = "媒體已就緒";
+                    document.getElementById('file-label').classList.add('text-yellow-500');
                 };
                 img.src = e.target.result;
             };
             reader.readAsDataURL(file);
         };
 
+        // 上傳數據
         window.upload = async () => {
-            if (!userReady) return alert("系統初始化中");
             const title = document.getElementById('p-title').value;
             const desc = document.getElementById('p-desc').value;
             const btn = document.getElementById('upload-btn');
-            const status = document.getElementById('status-msg');
-
-            if (!title || !imgData) return alert("請輸入標題並選擇照片");
+            if (!title || !imgData) return alert("標題與照片為必填項目。");
 
             btn.disabled = true;
-            status.innerText = "正在傳輸數據至雲端...";
-
             try {
                 await addDoc(collection(db, collectionPath), {
                     title, desc, img: imgData, time: Date.now()
                 });
-                
-                status.innerText = "同步成功！";
                 document.getElementById('p-title').value = "";
                 document.getElementById('p-desc').value = "";
                 imgData = null;
                 document.getElementById('file-label').innerText = "選取媒體內容";
-            } catch (e) {
-                showError("傳輸中斷: " + e.code);
-            } finally {
-                btn.disabled = false;
-            }
+                document.getElementById('file-label').classList.remove('text-yellow-500');
+            } catch (e) { alert("同步失敗。"); }
+            btn.disabled = false;
         };
 
-        window.render = (items) => {
+        // 渲染列表
+        function render(items) {
             const list = document.getElementById('list');
             if (items.length === 0) {
-                list.innerHTML = `<div class="col-span-full py-20 text-center text-zinc-800 text-xs tracking-widest border border-dashed border-white/5 rounded-[3rem]">DATABASE EMPTY</div>`;
+                list.innerHTML = `<div class="col-span-full py-20 text-center text-zinc-800 border border-dashed border-white/5 rounded-[3rem] uppercase tracking-[1em] text-[10px]">Vault is Empty</div>`;
                 return;
             }
             list.innerHTML = items.map(i => `
-                <div class="bg-zinc-900/30 border border-white/5 rounded-[2.5rem] overflow-hidden group hover:border-yellow-500/20 transition-all duration-500">
-                    <div class="h-64 overflow-hidden relative">
-                        <img src="${i.img}" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700">
-                        ${isAdmin ? `<button onclick="window.removeDoc('${i.id}')" class="absolute top-6 right-6 bg-red-600/80 hover:bg-red-600 text-white text-[10px] px-4 py-2 rounded-full backdrop-blur-md shadow-2xl transition-all">DELETE</button>` : ''}
+                <div class="bg-zinc-900/30 border border-white/5 rounded-[2.5rem] overflow-hidden group hover:border-yellow-500/20 transition-all duration-500 flex flex-col">
+                    <div class="h-64 overflow-hidden relative cursor-zoom-in" onclick="window.openLightbox('${i.img}')">
+                        <img src="${i.img}" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700">
+                        <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <span class="text-white text-[10px] font-bold tracking-[0.4em] uppercase bg-black/50 px-4 py-2 rounded-full backdrop-blur-sm border border-white/10">Expand View</span>
+                        </div>
+                        ${isAdmin ? `<button onclick="event.stopPropagation(); window.removeDoc('${i.id}')" class="absolute top-4 right-4 bg-red-600/80 hover:bg-red-600 text-white text-[10px] px-3 py-1 rounded-full backdrop-blur-md shadow-xl transition-all z-10">WIPE</button>` : ''}
                     </div>
                     <div class="p-8">
                         <div class="text-[8px] text-zinc-700 uppercase tracking-widest mb-3">${new Date(i.time).toLocaleString()}</div>
@@ -293,29 +310,28 @@
                     </div>
                 </div>
             `).join('');
-        };
+        }
 
+        // 刪除文件
         window.removeDoc = async (id) => {
-            if (confirm("確定要永久刪除此紀錄嗎？")) {
-                try {
-                    await deleteDoc(doc(db, collectionPath, id));
-                } catch (e) { alert("刪除失敗"); }
+            if (confirm("確認銷毀此數據紀錄？此動作無法復原。")) {
+                await deleteDoc(doc(db, collectionPath, id));
             }
         };
 
         function showError(msg) {
             const box = document.getElementById('error-display');
-            box.innerText = msg;
-            box.style.display = 'block';
+            box.innerText = msg; box.style.display = 'block';
         }
 
+        // 管理權限驗證
         window.verify = () => {
             if (document.getElementById('admin-pass').value === "97120719") {
                 isAdmin = true;
                 document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
                 window.closeLogin();
-                startRealtimeSync(); 
-            } else { alert("授權金鑰錯誤"); }
+                applySortAndRender(); // 重新渲染以顯示 WIPE 按鈕
+            } else { alert("ACCESS DENIED: 授權錯誤。"); }
         };
 
         window.openLogin = () => document.getElementById('login-modal').style.display = 'flex';
