@@ -63,15 +63,6 @@
             transition: all 0.3s ease;
             border: 1px solid rgba(191, 149, 63, 0.3);
         }
-        
-        .team-card {
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .team-card:hover {
-            transform: translateY(-10px);
-            border-color: rgba(191, 149, 63, 0.5);
-            background: rgba(255, 255, 255, 0.05);
-        }
     </style>
 </head>
 <body>
@@ -109,53 +100,54 @@
 
     <!-- 創辦人核心區塊 (Founder Section) -->
     <section id="founder-section" class="max-w-6xl mx-auto px-6 py-24 border-t border-white/5">
-        <div class="max-w-4xl mx-auto text-center space-y-12">
-            <div>
-                <h3 class="text-yellow-500 font-bold tracking-[0.4em] uppercase text-xs mb-4">The Visionary</h3>
-                <h2 class="text-4xl md:text-6xl font-black font-montserrat gold-gradient uppercase mb-6">創辦人核心</h2>
-                <div class="w-24 h-1 bg-gold mx-auto rounded-full"></div>
+        <div class="max-w-5xl mx-auto text-center space-y-20">
+            <!-- 視覺標題 -->
+            <div class="space-y-4">
+                <h3 class="text-yellow-500 font-bold tracking-[0.4em] uppercase text-[10px]">The Visionary</h3>
+                <h2 class="text-4xl md:text-6xl font-black font-montserrat gold-gradient uppercase">創辦人核心</h2>
+                <div class="w-16 h-[2px] bg-gold mx-auto mt-4"></div>
             </div>
             
-            <!-- 品牌願景文字 -->
-            <p class="text-zinc-300 leading-relaxed text-lg md:text-2xl font-light italic">
+            <!-- 品牌願景 -->
+            <p class="text-zinc-300 leading-relaxed text-lg md:text-2xl font-light italic max-w-3xl mx-auto">
                 「EAGROTE 的誕生源於對數位工藝的純粹追求。我們不只是在建立紀錄，而是在雕琢一段屬於時代的歷史。每一像素、每一行程式碼，都承載著我們對不屈精神的敬意。」
             </p>
 
-            <!-- 個人聯繫資訊區 -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 pt-8 border-t border-white/5 max-w-3xl mx-auto">
-                <div class="text-center group">
-                    <div class="text-[9px] text-zinc-600 uppercase tracking-[0.3em] mb-2 group-hover:text-yellow-500/50 transition-colors">Founder Name</div>
-                    <div class="text-lg font-bold text-white tracking-widest"林新程 Jasperlin</div>
+            <!-- 個人聯繫資訊：修正後的網格佈局 -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-y-12 md:gap-x-12 py-12 border-y border-white/5">
+                <div class="flex flex-col items-center">
+                    <span class="text-[9px] text-zinc-600 uppercase tracking-[0.3em] mb-3">Founder Name</span>
+                    <span class="text-lg font-bold text-white tracking-widest">林新程 Jasperlin</span>
                 </div>
-                <div class="text-center group">
-                    <div class="text-[9px] text-zinc-600 uppercase tracking-[0.3em] mb-2 group-hover:text-yellow-500/50 transition-colors">Digital Mail</div>
-                    <a href="Gmail:eagrote.tw@gmail.com" class="text-lg font-bold text-white tracking-tight hover:gold-gradient transition-all underline decoration-yellow-500/20 underline-offset-8">your-email@gmail.com</a>
+                <div class="flex flex-col items-center">
+                    <span class="text-[9px] text-zinc-600 uppercase tracking-[0.3em] mb-3">Digital Mail</span>
+                    <a href="mailto:eagrote.tw@gmail.com" class="text-lg font-bold text-white tracking-tight hover:gold-gradient transition-all border-b border-yellow-500/20 pb-1">eagrote.tw@gmail.com</a>
                 </div>
-                <div class="text-center group">
-                    <div class="text-[9px] text-zinc-600 uppercase tracking-[0.3em] mb-2 group-hover:text-yellow-500/50 transition-colors">Social Feed</div>
+                <div class="flex flex-col items-center">
+                    <span class="text-[9px] text-zinc-600 uppercase tracking-[0.3em] mb-3">Social Feed</span>
                     <a href="https://instagram.com/Jasperhclin" target="_blank" class="text-lg font-bold text-white tracking-widest hover:gold-gradient transition-all">@Jasperhclin</a>
                 </div>
             </div>
 
-            <!-- 核心指標 -->
-            <div class="pt-12 flex justify-center gap-16 md:gap-24 opacity-60">
-                <div>
-                    <div class="text-3xl font-bold text-white mb-1">2024</div>
-                    <div class="text-[10px] text-zinc-600 uppercase tracking-widest">Est. Year</div>
+            <!-- 核心指標：分開的容器避免重疊 -->
+            <div class="flex flex-wrap justify-center gap-12 md:gap-32">
+                <div class="text-center group">
+                    <div class="text-4xl font-black text-white group-hover:gold-gradient transition-all mb-2">2024</div>
+                    <div class="text-[10px] text-zinc-700 uppercase tracking-[0.4em]">Est. Year</div>
                 </div>
-                <div>
-                    <div class="text-3xl font-bold text-white mb-1">Infinity</div>
-                    <div class="text-[10px] text-zinc-600 uppercase tracking-widest">Innovation</div>
+                <div class="text-center group">
+                    <div class="text-4xl font-black text-white group-hover:gold-gradient transition-all mb-2">Infinity</div>
+                    <div class="text-[10px] text-zinc-700 uppercase tracking-[0.4em]">Innovation</div>
                 </div>
-                <div>
-                    <div class="text-3xl font-bold text-white mb-1">Pure</div>
-                    <div class="text-[10px] text-zinc-600 uppercase tracking-widest">Craftmanship</div>
+                <div class="text-center group">
+                    <div class="text-4xl font-black text-white group-hover:gold-gradient transition-all mb-2">Pure</div>
+                    <div class="text-[10px] text-zinc-700 uppercase tracking-[0.4em]">Craftmanship</div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- 管理員後台 -->
+    <!-- 管理員後台 (保持原樣) -->
     <section class="max-w-5xl mx-auto px-6 mb-20">
         <div id="admin-panel" class="admin-only space-y-8 p-10 bg-zinc-900/60 rounded-[3rem] border border-yellow-500/30 shadow-2xl backdrop-blur-md">
             <div class="grid md:grid-cols-2 gap-12">
@@ -184,7 +176,7 @@
         </div>
     </section>
 
-    <!-- 雲端紀錄列表控制區 -->
+    <!-- 雲端紀錄列表控制區 (保持原樣) -->
     <section class="max-w-6xl mx-auto px-6 py-10">
         <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-6">
             <div class="flex-1">
@@ -198,19 +190,18 @@
         <div id="list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
     </section>
 
-    <!-- 頁尾 (已調整為置中) -->
+    <!-- 頁尾 -->
     <footer class="max-w-6xl mx-auto px-6 py-24 border-t border-white/5 mt-20 text-center">
         <div class="flex flex-col items-center gap-6">
             <div>
                 <span class="text-3xl font-black font-montserrat tracking-[0.3em] gold-gradient mb-2 block">EAGROTE</span>
                 <p class="text-zinc-700 text-[10px] uppercase tracking-[0.5em]">Strength · Hope · Unyielding</p>
             </div>
-            <div class="w-12 h-[1px] bg-zinc-800 my-2"></div>
-            <p class="text-[10px] text-zinc-800 uppercase tracking-[0.4em]">© 2024 EAGROTE Cloud. All Rights Reserved.</p>
+            <p class="text-[10px] text-zinc-800 uppercase tracking-[0.4em] mt-4">© 2024 EAGROTE Cloud. All Rights Reserved.</p>
         </div>
     </footer>
 
-    <!-- 驗證彈窗 -->
+    <!-- 驗證彈窗 & 編輯彈窗 (腳本部分與之前一致) -->
     <div id="login-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/95 backdrop-blur-xl p-6">
         <div class="bg-zinc-950 p-12 rounded-[3.5rem] border border-white/10 w-full max-w-md text-center shadow-2xl">
             <h3 class="gold-gradient text-xl font-black mb-8 uppercase tracking-[0.3em]">Access Security</h3>
@@ -220,7 +211,6 @@
         </div>
     </div>
 
-    <!-- 編輯彈窗 -->
     <div id="edit-modal" class="fixed inset-0 z-[110] hidden items-center justify-center bg-black/90 backdrop-blur-2xl p-6">
         <div class="bg-zinc-950 p-10 rounded-[3rem] border border-yellow-500/20 w-full max-w-xl shadow-2xl overflow-y-auto max-h-[90vh]">
             <h3 class="gold-gradient text-lg font-black mb-8 uppercase tracking-[0.4em] text-center">Modify Record</h3>
@@ -266,11 +256,11 @@
             onSnapshot(collection(db, COLL_PROJECTS), (snap) => {
                 allProjects = snap.docs.map(d => ({id: d.id, ...d.data()}));
                 renderAll();
-            });
+            }, (err) => console.error(err));
             onSnapshot(collection(db, COLL_CATEGORIES), (snap) => {
                 allCategories = snap.docs.map(d => ({id: d.id, ...d.data()}));
                 renderCategories();
-            });
+            }, (err) => console.error(err));
         }
 
         window.toggleSort = () => {
