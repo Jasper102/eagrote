@@ -63,6 +63,15 @@
             transition: all 0.3s ease;
             border: 1px solid rgba(191, 149, 63, 0.3);
         }
+        
+        .team-card {
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .team-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(191, 149, 63, 0.5);
+            background: rgba(255, 255, 255, 0.05);
+        }
     </style>
 </head>
 <body>
@@ -79,9 +88,12 @@
             <div class="flex items-center cursor-pointer" onclick="window.scrollTo({top:0, behavior:'smooth'})">
                 <span class="text-2xl font-black font-montserrat tracking-[0.25em] gold-gradient">EAGROTE</span>
             </div>
-            <button onclick="window.openLogin()" class="text-zinc-500 hover:text-white transition-all uppercase text-[10px] tracking-[0.3em] font-bold border border-white/10 px-5 py-2 rounded-full hover:bg-white/5">
-                Authentication
-            </button>
+            <div class="flex items-center gap-4">
+                <a href="#founder-section" class="hidden md:block text-zinc-400 hover:text-yellow-500 transition-all text-[10px] tracking-[0.2em] font-bold uppercase">Founder Info</a>
+                <button onclick="window.openLogin()" class="text-zinc-500 hover:text-white transition-all uppercase text-[10px] tracking-[0.3em] font-bold border border-white/10 px-5 py-2 rounded-full hover:bg-white/5">
+                    Authentication
+                </button>
+            </div>
         </div>
     </nav>
 
@@ -95,11 +107,58 @@
         </div>
     </section>
 
+    <!-- 創辦人核心區塊 (Founder Section) -->
+    <section id="founder-section" class="max-w-6xl mx-auto px-6 py-24 border-t border-white/5">
+        <div class="max-w-4xl mx-auto text-center space-y-12">
+            <div>
+                <h3 class="text-yellow-500 font-bold tracking-[0.4em] uppercase text-xs mb-4">The Visionary</h3>
+                <h2 class="text-4xl md:text-6xl font-black font-montserrat gold-gradient uppercase mb-6">創辦人核心</h2>
+                <div class="w-24 h-1 bg-gold mx-auto rounded-full"></div>
+            </div>
+            
+            <!-- 品牌願景文字 -->
+            <p class="text-zinc-300 leading-relaxed text-lg md:text-2xl font-light italic">
+                「EAGROTE 的誕生源於對數位工藝的純粹追求。我們不只是在建立紀錄，而是在雕琢一段屬於時代的歷史。每一像素、每一行程式碼，都承載著我們對不屈精神的敬意。」
+            </p>
+
+            <!-- 個人聯繫資訊區 -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 pt-8 border-t border-white/5 max-w-3xl mx-auto">
+                <div class="text-center group">
+                    <div class="text-[9px] text-zinc-600 uppercase tracking-[0.3em] mb-2 group-hover:text-yellow-500/50 transition-colors">Founder Name</div>
+                    <div class="text-lg font-bold text-white tracking-widest"林新程 Jasperlin</div>
+                </div>
+                <div class="text-center group">
+                    <div class="text-[9px] text-zinc-600 uppercase tracking-[0.3em] mb-2 group-hover:text-yellow-500/50 transition-colors">Digital Mail</div>
+                    <a href="Gmail:eagrote.tw@gmail.com" class="text-lg font-bold text-white tracking-tight hover:gold-gradient transition-all underline decoration-yellow-500/20 underline-offset-8">your-email@gmail.com</a>
+                </div>
+                <div class="text-center group">
+                    <div class="text-[9px] text-zinc-600 uppercase tracking-[0.3em] mb-2 group-hover:text-yellow-500/50 transition-colors">Social Feed</div>
+                    <a href="https://instagram.com/Jasperhclin" target="_blank" class="text-lg font-bold text-white tracking-widest hover:gold-gradient transition-all">@Jasperhclin</a>
+                </div>
+            </div>
+
+            <!-- 核心指標 -->
+            <div class="pt-12 flex justify-center gap-16 md:gap-24 opacity-60">
+                <div>
+                    <div class="text-3xl font-bold text-white mb-1">2024</div>
+                    <div class="text-[10px] text-zinc-600 uppercase tracking-widest">Est. Year</div>
+                </div>
+                <div>
+                    <div class="text-3xl font-bold text-white mb-1">Infinity</div>
+                    <div class="text-[10px] text-zinc-600 uppercase tracking-widest">Innovation</div>
+                </div>
+                <div>
+                    <div class="text-3xl font-bold text-white mb-1">Pure</div>
+                    <div class="text-[10px] text-zinc-600 uppercase tracking-widest">Craftmanship</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- 管理員後台 -->
     <section class="max-w-5xl mx-auto px-6 mb-20">
         <div id="admin-panel" class="admin-only space-y-8 p-10 bg-zinc-900/60 rounded-[3rem] border border-yellow-500/30 shadow-2xl backdrop-blur-md">
             <div class="grid md:grid-cols-2 gap-12">
-                <!-- 分類管理 -->
                 <div>
                     <h2 class="text-yellow-500 font-black mb-6 tracking-[0.3em] uppercase text-xs">Categories Management</h2>
                     <div class="flex gap-2 mb-4">
@@ -108,21 +167,17 @@
                     </div>
                     <div id="admin-cat-list" class="space-y-2 max-h-48 overflow-y-auto pr-2"></div>
                 </div>
-
-                <!-- 內容發佈 -->
                 <div>
                     <h2 class="text-yellow-500 font-black mb-6 tracking-[0.3em] uppercase text-xs">Archive New Content</h2>
                     <div class="space-y-4">
                         <input type="text" id="p-title" placeholder="紀錄標題" class="w-full bg-black border border-zinc-800 p-4 rounded-xl text-sm outline-none text-white">
-                        <select id="p-cat" class="w-full bg-black border border-zinc-800 p-4 rounded-xl text-sm outline-none text-zinc-400">
-                            <option value="">選擇分類...</option>
-                        </select>
+                        <select id="p-cat" class="w-full bg-black border border-zinc-800 p-4 rounded-xl text-sm outline-none text-zinc-400"></select>
                         <div class="flex gap-4">
                             <button onclick="document.getElementById('p-file').click()" class="flex-1 bg-zinc-800/50 p-4 rounded-xl text-zinc-400 text-xs border border-dashed border-zinc-700" id="file-label">選取媒體</button>
                             <input type="file" id="p-file" accept="image/*" onchange="window.processImg(this, 'new')" class="hidden">
                         </div>
                         <textarea id="p-desc" placeholder="詳細內容描述..." class="w-full bg-black border border-zinc-800 p-4 rounded-xl h-24 text-sm outline-none text-white"></textarea>
-                        <button id="upload-btn" onclick="window.upload()" class="w-full bg-gold text-black font-black py-4 rounded-xl uppercase tracking-[0.2em] text-sm hover:scale-[1.01] active:scale-95 transition-all">發佈至雲端</button>
+                        <button onclick="window.upload()" class="w-full bg-gold text-black font-black py-4 rounded-xl uppercase tracking-[0.2em] text-sm hover:scale-[1.01] transition-all">發佈至雲端</button>
                     </div>
                 </div>
             </div>
@@ -134,23 +189,26 @@
         <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-6">
             <div class="flex-1">
                 <h2 class="text-2xl font-black font-montserrat gold-gradient uppercase tracking-widest mb-6">Cloud Archive</h2>
-                <!-- 分類濾鏡 -->
-                <div id="filter-bar" class="flex flex-wrap gap-3">
-                    <div onclick="window.setFilter('all')" class="cat-tag active px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest" data-cat="all">All Archive</div>
-                </div>
+                <div id="filter-bar" class="flex flex-wrap gap-3"></div>
             </div>
-            
-            <!-- 排序控制 -->
-            <button id="toggle-sort" onclick="window.toggleSort()" class="sort-btn px-6 py-2.5 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase text-yellow-500 flex items-center gap-2 hover:bg-yellow-500/10">
+            <button onclick="window.toggleSort()" class="sort-btn px-6 py-2.5 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase text-yellow-500 flex items-center gap-2 hover:bg-yellow-500/10">
                 <span id="sort-label">最早靠上</span>
-                <svg id="sort-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg>
             </button>
         </div>
-
-        <div id="list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <!-- 內容載入區 -->
-        </div>
+        <div id="list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
     </section>
+
+    <!-- 頁尾 (已調整為置中) -->
+    <footer class="max-w-6xl mx-auto px-6 py-24 border-t border-white/5 mt-20 text-center">
+        <div class="flex flex-col items-center gap-6">
+            <div>
+                <span class="text-3xl font-black font-montserrat tracking-[0.3em] gold-gradient mb-2 block">EAGROTE</span>
+                <p class="text-zinc-700 text-[10px] uppercase tracking-[0.5em]">Strength · Hope · Unyielding</p>
+            </div>
+            <div class="w-12 h-[1px] bg-zinc-800 my-2"></div>
+            <p class="text-[10px] text-zinc-800 uppercase tracking-[0.4em]">© 2024 EAGROTE Cloud. All Rights Reserved.</p>
+        </div>
+    </footer>
 
     <!-- 驗證彈窗 -->
     <div id="login-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/95 backdrop-blur-xl p-6">
@@ -168,9 +226,7 @@
             <h3 class="gold-gradient text-lg font-black mb-8 uppercase tracking-[0.4em] text-center">Modify Record</h3>
             <div class="space-y-4">
                 <input type="text" id="edit-title" class="w-full bg-black border border-zinc-800 p-4 rounded-xl text-white outline-none">
-                <select id="edit-cat" class="w-full bg-black border border-zinc-800 p-4 rounded-xl text-white outline-none">
-                    <option value="">無分類</option>
-                </select>
+                <select id="edit-cat" class="w-full bg-black border border-zinc-800 p-4 rounded-xl text-white outline-none"></select>
                 <div class="relative group h-48 overflow-hidden rounded-xl border border-zinc-800">
                     <img id="edit-preview" src="" class="w-full h-full object-cover opacity-50">
                     <button onclick="document.getElementById('edit-file').click()" class="absolute inset-0 flex items-center justify-center text-[10px] uppercase font-bold text-white/50 group-hover:text-white transition-all">更換照片</button>
@@ -192,12 +248,11 @@
 
         let db, auth, isAdmin = false;
         let imgData = null, editImgData = null, editingId = null;
-        let allProjects = [], allCategories = [], currentFilter = 'all', sortNewest = false; // 預設改為 false (最早靠上)
+        let allProjects = [], allCategories = [], currentFilter = 'all', sortNewest = false; 
 
         const COLL_PROJECTS = "eagrote_production_vault";
         const COLL_CATEGORIES = "eagrote_categories";
 
-        // 初始化
         const app = initializeApp(window.firebaseConfig);
         auth = getAuth(app);
         db = getFirestore(app);
@@ -218,14 +273,12 @@
             });
         }
 
-        // --- 排序切換 ---
         window.toggleSort = () => {
             sortNewest = !sortNewest;
             document.getElementById('sort-label').innerText = sortNewest ? "最新靠上" : "最早靠上";
             renderAll();
         };
 
-        // --- 分類切換 ---
         window.setFilter = (catId) => {
             currentFilter = catId;
             document.querySelectorAll('.cat-tag').forEach(tag => {
@@ -246,56 +299,47 @@
         };
 
         function renderCategories() {
-            const adminList = document.getElementById('admin-cat-list');
-            adminList.innerHTML = allCategories.map(c => `
-                <div class="flex justify-between items-center bg-black/40 p-3 rounded-xl border border-white/5">
-                    <span class="text-xs font-bold text-zinc-300">${c.name}</span>
-                    <button onclick="window.removeCategory('${c.id}')" class="text-[10px] text-red-500/50 hover:text-red-500">REMOVE</button>
-                </div>
-            `).join('');
-
             const options = `<option value="">無分類</option>` + allCategories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-            document.getElementById('p-cat').innerHTML = options;
-            document.getElementById('edit-cat').innerHTML = options;
+            const pCat = document.getElementById('p-cat');
+            const eCat = document.getElementById('edit-cat');
+            if(pCat) pCat.innerHTML = options;
+            if(eCat) eCat.innerHTML = options;
 
             const filterBar = document.getElementById('filter-bar');
-            const allBtn = `<div onclick="window.setFilter('all')" class="cat-tag ${currentFilter==='all'?'active':''} px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest" data-cat="all">All Archive</div>`;
-            const catBtns = allCategories.map(c => `
-                <div onclick="window.setFilter('${c.id}')" class="cat-tag ${currentFilter===c.id?'active':''} px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest" data-cat="${c.id}">${c.name}</div>
-            `).join('');
-            filterBar.innerHTML = allBtn + catBtns;
+            if(filterBar) {
+                const allBtn = `<div onclick="window.setFilter('all')" class="cat-tag ${currentFilter==='all'?'active':''} px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest" data-cat="all">All Archive</div>`;
+                const catBtns = allCategories.map(c => `<div onclick="window.setFilter('${c.id}')" class="cat-tag ${currentFilter===c.id?'active':''} px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest" data-cat="${c.id}">${c.name}</div>`).join('');
+                filterBar.innerHTML = allBtn + catBtns;
+            }
+
+            const adminList = document.getElementById('admin-cat-list');
+            if (adminList) {
+                adminList.innerHTML = allCategories.map(c => `
+                    <div class="flex justify-between items-center bg-black/40 p-3 rounded-xl border border-white/5">
+                        <span class="text-xs font-bold text-zinc-300">${c.name}</span>
+                        <button onclick="window.removeCategory('${c.id}')" class="text-[10px] text-red-500/50 hover:text-red-500">REMOVE</button>
+                    </div>
+                `).join('');
+            }
         }
 
-        // --- 作品渲染 ---
         function renderAll() {
-            let filtered = currentFilter === 'all' 
-                ? allProjects 
-                : allProjects.filter(p => p.categoryId === currentFilter);
-            
-            // 同時執行排序與濾鏡
+            let filtered = currentFilter === 'all' ? allProjects : allProjects.filter(p => p.categoryId === currentFilter);
             const sorted = filtered.sort((a,b) => sortNewest ? b.time - a.time : a.time - b.time);
-            
             const list = document.getElementById('list');
+            if (!list) return;
             if (sorted.length === 0) {
                 list.innerHTML = `<div class="col-span-full py-20 text-center text-zinc-800 border border-dashed border-white/5 rounded-[3rem] uppercase tracking-widest text-[10px]">No records found</div>`;
                 return;
             }
-
             list.innerHTML = sorted.map(i => {
                 const cat = allCategories.find(c => c.id === i.categoryId);
                 return `
                     <div class="bg-zinc-900/30 border border-white/5 rounded-[2.5rem] overflow-hidden group hover:border-yellow-500/20 transition-all duration-500 flex flex-col">
                         <div class="h-64 overflow-hidden relative cursor-zoom-in" onclick="window.openLightbox('${i.img}')">
                             <img src="${i.img}" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all">
-                            <div class="absolute top-4 left-4 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 text-[8px] font-bold text-yellow-500 tracking-widest uppercase">
-                                ${cat ? cat.name : 'General'}
-                            </div>
-                            ${isAdmin ? `
-                                <div class="absolute top-4 right-4 flex gap-2">
-                                    <button onclick="event.stopPropagation(); window.openEdit('${i.id}')" class="bg-yellow-500 text-black text-[10px] px-3 py-1 rounded-full font-black">EDIT</button>
-                                    <button onclick="event.stopPropagation(); window.removeDoc('${i.id}')" class="bg-red-600 text-white text-[10px] px-3 py-1 rounded-full">WIPE</button>
-                                </div>
-                            ` : ''}
+                            <div class="absolute top-4 left-4 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 text-[8px] font-bold text-yellow-500 tracking-widest uppercase">${cat ? cat.name : 'General'}</div>
+                            ${isAdmin ? `<div class="absolute top-4 right-4 flex gap-2"><button onclick="event.stopPropagation(); window.openEdit('${i.id}')" class="bg-yellow-500 text-black text-[10px] px-3 py-1 rounded-full font-black">EDIT</button><button onclick="event.stopPropagation(); window.removeDoc('${i.id}')" class="bg-red-600 text-white text-[10px] px-3 py-1 rounded-full">WIPE</button></div>` : ''}
                         </div>
                         <div class="p-8">
                             <div class="text-[8px] text-zinc-700 uppercase tracking-widest mb-2">${new Date(i.time).toLocaleDateString()}</div>
@@ -311,22 +355,35 @@
             const title = document.getElementById('p-title').value;
             const categoryId = document.getElementById('p-cat').value;
             const desc = document.getElementById('p-desc').value;
-            if (!title || !imgData) return alert("Missing Title or Image");
-
-            await addDoc(collection(db, COLL_PROJECTS), { 
-                title, desc, categoryId, img: imgData, time: Date.now() 
-            });
-            document.getElementById('p-title').value = "";
-            document.getElementById('p-desc').value = "";
-            imgData = null;
+            if (!title || !imgData) return;
+            await addDoc(collection(db, COLL_PROJECTS), { title, desc, categoryId, img: imgData, time: Date.now() });
+            document.getElementById('p-title').value = ""; document.getElementById('p-desc').value = ""; imgData = null;
             document.getElementById('file-label').innerText = "選取媒體";
         };
 
+        window.processImg = (input, mode) => {
+            const file = input.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const targetSize = 1080; let w = img.width, h = img.height;
+                    if (w > h) { h = (targetSize/w)*h; w = targetSize; } else { w = (targetSize/h)*w; h = targetSize; }
+                    canvas.width = w; canvas.height = h;
+                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                    const res = canvas.toDataURL('image/jpeg', 0.7);
+                    if (mode === 'edit') { editImgData = res; document.getElementById('edit-preview').src = res; }
+                    else { imgData = res; document.getElementById('file-label').innerText = "Ready"; }
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        };
+
         window.openEdit = (id) => {
-            const item = allProjects.find(i => i.id === id);
-            if (!item) return;
-            editingId = id;
-            editImgData = item.img;
+            const item = allProjects.find(i => i.id === id); if (!item) return;
+            editingId = id; editImgData = item.img;
             document.getElementById('edit-title').value = item.title;
             document.getElementById('edit-cat').value = item.categoryId || "";
             document.getElementById('edit-desc').value = item.desc || "";
@@ -345,49 +402,18 @@
         };
 
         window.closeEdit = () => { document.getElementById('edit-modal').style.display = 'none'; editingId = null; };
-        
-        window.removeDoc = async (id) => {
-            if (confirm("Destroy this data?")) await deleteDoc(doc(db, COLL_PROJECTS, id));
-        };
-
-        window.processImg = (input, mode) => {
-            const file = input.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const img = new Image();
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    const targetSize = 1080;
-                    let w = img.width, h = img.height;
-                    if (w > h) { h = (targetSize/w)*h; w = targetSize; } else { w = (targetSize/h)*w; h = targetSize; }
-                    canvas.width = w; canvas.height = h;
-                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                    const res = canvas.toDataURL('image/jpeg', 0.7);
-                    if (mode === 'edit') { editImgData = res; document.getElementById('edit-preview').src = res; }
-                    else { imgData = res; document.getElementById('file-label').innerText = "Ready"; }
-                };
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-        };
-
+        window.removeDoc = async (id) => { if (confirm("Destroy this data?")) await deleteDoc(doc(db, COLL_PROJECTS, id)); };
+        window.openLogin = () => document.getElementById('login-modal').style.display = 'flex';
+        window.closeLogin = () => document.getElementById('login-modal').style.display = 'none';
+        window.openLightbox = (src) => { document.getElementById('lightbox-img').src = src; document.getElementById('lightbox').classList.add('active'); };
+        window.closeLightbox = () => document.getElementById('lightbox').classList.remove('active');
         window.verify = () => {
             if (document.getElementById('admin-pass').value === "97120719") {
                 isAdmin = true;
                 document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
-                window.closeLogin();
-                renderAll();
+                window.closeLogin(); renderAll();
             } else { alert("ACCESS DENIED"); }
         };
-
-        window.openLogin = () => document.getElementById('login-modal').style.display = 'flex';
-        window.closeLogin = () => document.getElementById('login-modal').style.display = 'none';
-        window.openLightbox = (src) => {
-            document.getElementById('lightbox-img').src = src;
-            document.getElementById('lightbox').classList.add('active');
-        };
-        window.closeLightbox = () => document.getElementById('lightbox').classList.remove('active');
     </script>
 </body>
 </html>
