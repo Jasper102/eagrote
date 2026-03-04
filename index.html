@@ -116,7 +116,7 @@
                     <button onclick="document.getElementById('p-file').click()" class="flex-1 bg-zinc-800/50 p-5 rounded-2xl text-zinc-400 text-sm border border-dashed border-zinc-700 hover:bg-zinc-800 transition-all" id="file-label">
                         選取媒體內容
                     </button>
-                    <input type="file" id="p-file" accept="image/*" onchange="window.processImg(this)" class="hidden">
+                    <input type="file" id="p-file" accept="image/*" onchange="window.processImg(this, 'new')" class="hidden">
                 </div>
 
                 <textarea id="p-desc" placeholder="詳細內容描述..." class="w-full bg-black border border-zinc-800 p-5 rounded-2xl h-32 text-white outline-none focus:border-yellow-500/50 transition-all"></textarea>
@@ -177,13 +177,38 @@
         </div>
     </div>
 
+    <!-- 編輯彈窗 -->
+    <div id="edit-modal" class="fixed inset-0 z-[110] hidden items-center justify-center bg-black/90 backdrop-blur-2xl p-6">
+        <div class="bg-zinc-950 p-10 rounded-[3rem] border border-yellow-500/20 w-full max-w-xl shadow-2xl overflow-y-auto max-h-[90vh]">
+            <h3 class="gold-gradient text-lg font-black mb-8 uppercase tracking-[0.4em] text-center">Modify Record</h3>
+            <div class="space-y-4">
+                <input type="text" id="edit-title" class="w-full bg-black border border-zinc-800 p-4 rounded-xl text-white outline-none focus:border-yellow-500/50" placeholder="修改標題">
+                
+                <div class="relative group">
+                    <img id="edit-preview" src="" class="w-full h-40 object-cover rounded-xl border border-zinc-800 mb-2 opacity-50">
+                    <button onclick="document.getElementById('edit-file').click()" class="absolute inset-0 flex items-center justify-center text-[10px] uppercase font-bold tracking-widest text-white/50 group-hover:text-white transition-all">
+                        更換照片
+                    </button>
+                    <input type="file" id="edit-file" accept="image/*" onchange="window.processImg(this, 'edit')" class="hidden">
+                </div>
+
+                <textarea id="edit-desc" class="w-full bg-black border border-zinc-800 p-4 rounded-xl h-32 text-white outline-none focus:border-yellow-500/50" placeholder="修改內容描述"></textarea>
+                
+                <div class="flex gap-4 pt-4">
+                    <button onclick="window.saveEdit()" class="flex-1 bg-gold text-black font-black py-4 rounded-xl uppercase tracking-widest shadow-lg active:scale-95 transition-all">保存更改</button>
+                    <button onclick="window.closeEdit()" class="flex-1 bg-zinc-900 text-zinc-500 font-bold py-4 rounded-xl uppercase tracking-widest hover:text-white transition-all">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        let db, auth, imgData = null, isAdmin = false;
-        let sortOldestFirst = true; // 預設最早傳的靠上
+        let db, auth, imgData = null, editImgData = null, editingId = null, isAdmin = false;
+        let sortOldestFirst = true;
         let currentItems = [];
         const collectionPath = "eagrote_production_vault"; 
 
@@ -210,20 +235,15 @@
             });
         }
 
-        // 切換排序邏輯
+        // 切換排序
         window.toggleSort = () => {
             sortOldestFirst = !sortOldestFirst;
-            const label = document.getElementById('sort-label');
-            label.innerText = sortOldestFirst ? "最早靠上" : "最新靠上";
+            document.getElementById('sort-label').innerText = sortOldestFirst ? "最早靠上" : "最新靠上";
             applySortAndRender();
         };
 
         function applySortAndRender() {
-            // 排序: a.time - b.time 是舊到新 (最早靠上)
-            // b.time - a.time 是新到舊 (最新靠上)
-            const sorted = [...currentItems].sort((a, b) => {
-                return sortOldestFirst ? a.time - b.time : b.time - a.time;
-            });
+            const sorted = [...currentItems].sort((a, b) => sortOldestFirst ? a.time - b.time : b.time - a.time);
             render(sorted);
         }
 
@@ -242,11 +262,10 @@
             document.body.style.overflow = 'auto';
         };
 
-        // 圖片處理 (壓縮至 JPEG 0.7)
-        window.processImg = (input) => {
+        // 圖片處理
+        window.processImg = (input, mode) => {
             const file = input.files[0];
             if (!file) return;
-            document.getElementById('file-label').innerText = "數據處理中...";
             const reader = new FileReader();
             reader.onload = (e) => {
                 const img = new Image();
@@ -257,9 +276,15 @@
                     if (w > h) { h = (targetSize/w)*h; w = targetSize; } else { w = (targetSize/h)*w; h = targetSize; }
                     canvas.width = w; canvas.height = h;
                     canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                    imgData = canvas.toDataURL('image/jpeg', 0.7); 
-                    document.getElementById('file-label').innerText = "媒體已就緒";
-                    document.getElementById('file-label').classList.add('text-yellow-500');
+                    const compressed = canvas.toDataURL('image/jpeg', 0.7);
+                    if (mode === 'edit') {
+                        editImgData = compressed;
+                        document.getElementById('edit-preview').src = compressed;
+                    } else {
+                        imgData = compressed;
+                        document.getElementById('file-label').innerText = "媒體已就緒";
+                        document.getElementById('file-label').classList.add('text-yellow-500');
+                    }
                 };
                 img.src = e.target.result;
             };
@@ -275,9 +300,7 @@
 
             btn.disabled = true;
             try {
-                await addDoc(collection(db, collectionPath), {
-                    title, desc, img: imgData, time: Date.now()
-                });
+                await addDoc(collection(db, collectionPath), { title, desc, img: imgData, time: Date.now() });
                 document.getElementById('p-title').value = "";
                 document.getElementById('p-desc').value = "";
                 imgData = null;
@@ -285,6 +308,37 @@
                 document.getElementById('file-label').classList.remove('text-yellow-500');
             } catch (e) { alert("同步失敗。"); }
             btn.disabled = false;
+        };
+
+        // 編輯功能
+        window.openEdit = (id) => {
+            const item = currentItems.find(i => i.id === id);
+            if (!item) return;
+            editingId = id;
+            editImgData = item.img;
+            document.getElementById('edit-title').value = item.title;
+            document.getElementById('edit-desc').value = item.desc || "";
+            document.getElementById('edit-preview').src = item.img;
+            document.getElementById('edit-modal').style.display = 'flex';
+        };
+
+        window.closeEdit = () => {
+            document.getElementById('edit-modal').style.display = 'none';
+            editingId = null;
+            editImgData = null;
+        };
+
+        window.saveEdit = async () => {
+            if (!editingId) return;
+            const title = document.getElementById('edit-title').value;
+            const desc = document.getElementById('edit-desc').value;
+            
+            try {
+                await updateDoc(doc(db, collectionPath, editingId), {
+                    title, desc, img: editImgData
+                });
+                window.closeEdit();
+            } catch (e) { alert("更新失敗。"); }
         };
 
         // 渲染列表
@@ -301,7 +355,12 @@
                         <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                             <span class="text-white text-[10px] font-bold tracking-[0.4em] uppercase bg-black/50 px-4 py-2 rounded-full backdrop-blur-sm border border-white/10">Expand View</span>
                         </div>
-                        ${isAdmin ? `<button onclick="event.stopPropagation(); window.removeDoc('${i.id}')" class="absolute top-4 right-4 bg-red-600/80 hover:bg-red-600 text-white text-[10px] px-3 py-1 rounded-full backdrop-blur-md shadow-xl transition-all z-10">WIPE</button>` : ''}
+                        ${isAdmin ? `
+                            <div class="absolute top-4 right-4 flex gap-2 z-10">
+                                <button onclick="event.stopPropagation(); window.openEdit('${i.id}')" class="bg-yellow-500/80 hover:bg-yellow-500 text-black text-[10px] px-3 py-1 rounded-full backdrop-blur-md shadow-xl transition-all font-black">EDIT</button>
+                                <button onclick="event.stopPropagation(); window.removeDoc('${i.id}')" class="bg-red-600/80 hover:bg-red-600 text-white text-[10px] px-3 py-1 rounded-full backdrop-blur-md shadow-xl transition-all">WIPE</button>
+                            </div>
+                        ` : ''}
                     </div>
                     <div class="p-8">
                         <div class="text-[8px] text-zinc-700 uppercase tracking-widest mb-3">${new Date(i.time).toLocaleString()}</div>
@@ -330,7 +389,7 @@
                 isAdmin = true;
                 document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
                 window.closeLogin();
-                applySortAndRender(); // 重新渲染以顯示 WIPE 按鈕
+                applySortAndRender();
             } else { alert("ACCESS DENIED: 授權錯誤。"); }
         };
 
@@ -339,4 +398,3 @@
     </script>
 </body>
 </html>
-
