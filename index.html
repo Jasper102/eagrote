@@ -35,38 +35,28 @@
         
         .glow-bg { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 100%; height: 600px; background: radial-gradient(circle at center, rgba(191, 149, 63, 0.1) 0%, transparent 70%); z-index: -1; pointer-events: none; }
 
-        /* 照片點開後的放大燈箱效果 */
         #lightbox {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.95);
-            z-index: 200;
-            cursor: zoom-out;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(10px);
-            padding: 20px;
+            display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.95);
+            z-index: 200; cursor: zoom-out; align-items: center; justify-content: center;
+            backdrop-filter: blur(10px); padding: 20px;
         }
         #lightbox img {
-            max-width: 95%;
-            max-height: 95%;
-            border-radius: 8px;
-            box-shadow: 0 0 50px rgba(0,0,0,0.8);
-            transform: scale(0.9);
+            max-width: 95%; max-height: 95%; border-radius: 8px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8); transform: scale(0.9);
             transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         #lightbox.active { display: flex; }
         #lightbox.active img { transform: scale(1); }
 
-        /* 按鈕特殊樣式 */
-        .sort-btn {
+        .cat-tag {
             transition: all 0.3s ease;
-            border: 1px solid rgba(191, 149, 63, 0.3);
+            cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.05);
         }
-        .sort-btn:hover {
-            border-color: rgba(191, 149, 63, 1);
-            background: rgba(191, 149, 63, 0.1);
+        .cat-tag.active {
+            background: #BF953F;
+            color: black;
+            border-color: #FCF6BA;
         }
     </style>
 </head>
@@ -74,7 +64,6 @@
 
     <div class="glow-bg"></div>
 
-    <!-- 圖片放大燈箱 -->
     <div id="lightbox" onclick="window.closeLightbox()">
         <img id="lightbox-img" src="" alt="Enlarged view">
     </div>
@@ -98,81 +87,64 @@
                 Official Digital Archive
             </div>
             <h1 class="text-5xl md:text-8xl font-black font-montserrat mb-8 gold-gradient uppercase tracking-tighter leading-tight">力量 · 希望 · 不屈</h1>
-            <p class="text-zinc-500 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed font-light">
-                傳承鷹之意志，在雲端建立聖殿。<br>
-                EAGROTE 為追求卓越與突破極限的追夢者而生。
-            </p>
         </div>
     </section>
 
     <!-- 管理員後台 (Admin Only) -->
-    <section class="max-w-4xl mx-auto px-6 py-20">
-        <div id="admin-panel" class="admin-only mb-20 p-10 bg-zinc-900/60 rounded-[3rem] border border-yellow-500/30 shadow-2xl backdrop-blur-md">
-            <h2 class="text-yellow-500 font-black mb-8 tracking-[0.5em] uppercase text-center text-sm">Command Center</h2>
-            <div class="space-y-5">
-                <input type="text" id="p-title" placeholder="紀錄標題" class="w-full bg-black border border-zinc-800 p-5 rounded-2xl text-white outline-none focus:border-yellow-500/50 transition-all">
-                
-                <div class="flex gap-4">
-                    <button onclick="document.getElementById('p-file').click()" class="flex-1 bg-zinc-800/50 p-5 rounded-2xl text-zinc-400 text-sm border border-dashed border-zinc-700 hover:bg-zinc-800 transition-all" id="file-label">
-                        選取媒體內容
-                    </button>
-                    <input type="file" id="p-file" accept="image/*" onchange="window.processImg(this, 'new')" class="hidden">
+    <section class="max-w-5xl mx-auto px-6 mb-20">
+        <div id="admin-panel" class="admin-only space-y-8 p-10 bg-zinc-900/60 rounded-[3rem] border border-yellow-500/30 shadow-2xl backdrop-blur-md">
+            <div class="grid md:grid-cols-2 gap-12">
+                <!-- 分類管理 -->
+                <div>
+                    <h2 class="text-yellow-500 font-black mb-6 tracking-[0.3em] uppercase text-xs">Categories Management</h2>
+                    <div class="flex gap-2 mb-4">
+                        <input type="text" id="new-cat-name" placeholder="新分類名稱" class="flex-1 bg-black border border-zinc-800 p-3 rounded-xl text-sm outline-none">
+                        <button onclick="window.addCategory()" class="bg-yellow-600 px-4 py-2 rounded-xl text-black font-bold text-xs">新增</button>
+                    </div>
+                    <div id="admin-cat-list" class="space-y-2 max-h-48 overflow-y-auto pr-2">
+                        <!-- 分類清單 -->
+                    </div>
                 </div>
 
-                <textarea id="p-desc" placeholder="詳細內容描述..." class="w-full bg-black border border-zinc-800 p-5 rounded-2xl h-32 text-white outline-none focus:border-yellow-500/50 transition-all"></textarea>
-                
-                <button id="upload-btn" onclick="window.upload()" class="w-full bg-gold text-black font-black py-5 rounded-2xl uppercase tracking-[0.3em] hover:scale-[1.01] active:scale-95 transition-all shadow-xl shadow-yellow-500/10">
-                    同步至雲端伺服器
-                </button>
-                <div id="status-msg" class="text-center text-[10px] text-zinc-600 uppercase tracking-widest mt-4">System Ready</div>
-            </div>
-        </div>
-
-        <!-- 雲端紀錄列表控制區 -->
-        <div class="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-6">
-            <div class="flex items-center gap-4">
-                <h2 class="text-2xl font-black font-montserrat gold-gradient uppercase tracking-widest whitespace-nowrap">Cloud Archive</h2>
-                <div class="h-px w-12 bg-white/10"></div>
-                <!-- 排序切換按鈕 -->
-                <button id="toggle-sort" onclick="window.toggleSort()" class="sort-btn px-4 py-1.5 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase text-yellow-500 flex items-center gap-2">
-                    <span id="sort-label">最早靠上</span>
-                    <svg id="sort-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg>
-                </button>
-            </div>
-            <div class="text-zinc-800 text-[10px] uppercase font-bold tracking-widest hidden md:block">Database Integrated</div>
-        </div>
-        
-        <div id="error-display" class="error-box"></div>
-        <div id="list" class="grid grid-cols-1 md:grid-cols-2 gap-10">
-            <!-- 內容由 JavaScript 動態載入 -->
-        </div>
-    </section>
-
-    <!-- 創辦人資訊區 -->
-    <section class="py-32 px-6 bg-zinc-950/80 border-t border-white/5">
-        <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center gap-16">
-            <div class="w-48 h-48 bg-zinc-900 border border-white/10 rounded-[3rem] flex items-center justify-center relative overflow-hidden shadow-2xl">
-                <span class="text-6xl font-black gold-gradient font-montserrat">LC</span>
-            </div>
-            <div class="flex-1 text-center md:text-left">
-                <div class="inline-block px-3 py-1 bg-yellow-500/10 text-yellow-500 text-[10px] font-black tracking-widest uppercase rounded-full mb-6">創辦人</div>
-                <h3 class="text-5xl font-black gold-gradient tracking-tight mb-6">林新程 Jasper Lin</h3>
-                <p class="text-zinc-500 text-sm tracking-widest">eagrote.tw@gmail.com | IG: Jasperhclin</p>
+                <!-- 內容發佈 -->
+                <div>
+                    <h2 class="text-yellow-500 font-black mb-6 tracking-[0.3em] uppercase text-xs">Archive New Content</h2>
+                    <div class="space-y-4">
+                        <input type="text" id="p-title" placeholder="紀錄標題" class="w-full bg-black border border-zinc-800 p-4 rounded-xl text-sm outline-none">
+                        <select id="p-cat" class="w-full bg-black border border-zinc-800 p-4 rounded-xl text-sm outline-none text-zinc-400">
+                            <option value="">選擇分類...</option>
+                        </select>
+                        <div class="flex gap-4">
+                            <button onclick="document.getElementById('p-file').click()" class="flex-1 bg-zinc-800/50 p-4 rounded-xl text-zinc-400 text-xs border border-dashed border-zinc-700" id="file-label">選取媒體</button>
+                            <input type="file" id="p-file" accept="image/*" onchange="window.processImg(this, 'new')" class="hidden">
+                        </div>
+                        <textarea id="p-desc" placeholder="詳細內容描述..." class="w-full bg-black border border-zinc-800 p-4 rounded-xl h-24 text-sm outline-none"></textarea>
+                        <button id="upload-btn" onclick="window.upload()" class="w-full bg-gold text-black font-black py-4 rounded-xl uppercase tracking-[0.2em] text-sm">發佈至雲端</button>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
 
-    <footer class="py-16 text-center border-t border-white/5">
-        <p class="text-zinc-800 text-[8px] tracking-[1.2em] uppercase font-bold">Persistence is the soul of EAGROTE</p>
-        <p class="text-zinc-900 text-[7px] mt-4 uppercase tracking-widest">© 2024 EAGROTE TEAM. ALL RIGHTS RESERVED.</p>
-    </footer>
+    <!-- 雲端紀錄列表區 -->
+    <section class="max-w-6xl mx-auto px-6 py-10">
+        <!-- 分類濾鏡導覽 -->
+        <div id="filter-bar" class="flex flex-wrap gap-3 mb-12 justify-center md:justify-start">
+            <div onclick="window.setFilter('all')" class="cat-tag active px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest" data-cat="all">All Archive</div>
+            <!-- 動態插入分類標籤 -->
+        </div>
+
+        <div id="list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- 內容 -->
+        </div>
+    </section>
 
     <!-- 驗證彈窗 -->
     <div id="login-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/95 backdrop-blur-xl p-6">
         <div class="bg-zinc-950 p-12 rounded-[3.5rem] border border-white/10 w-full max-w-md text-center shadow-2xl">
             <h3 class="gold-gradient text-xl font-black mb-8 uppercase tracking-[0.3em]">Access Security</h3>
             <input type="password" id="admin-pass" class="w-full bg-black border border-zinc-900 p-5 rounded-2xl text-center text-white mb-8 outline-none focus:border-yellow-500/50 text-2xl tracking-[0.5em]" placeholder="••••••">
-            <button onclick="window.verify()" class="w-full bg-gold text-black font-black py-5 rounded-2xl uppercase tracking-widest shadow-lg active:scale-95 transition-all">Verify Access</button>
+            <button onclick="window.verify()" class="w-full bg-gold text-black font-black py-5 rounded-2xl uppercase tracking-widest">Verify Access</button>
             <button onclick="window.closeLogin()" class="mt-8 text-zinc-700 text-[10px] uppercase tracking-widest hover:text-zinc-400">Cancel</button>
         </div>
     </div>
@@ -182,21 +154,19 @@
         <div class="bg-zinc-950 p-10 rounded-[3rem] border border-yellow-500/20 w-full max-w-xl shadow-2xl overflow-y-auto max-h-[90vh]">
             <h3 class="gold-gradient text-lg font-black mb-8 uppercase tracking-[0.4em] text-center">Modify Record</h3>
             <div class="space-y-4">
-                <input type="text" id="edit-title" class="w-full bg-black border border-zinc-800 p-4 rounded-xl text-white outline-none focus:border-yellow-500/50" placeholder="修改標題">
-                
-                <div class="relative group">
-                    <img id="edit-preview" src="" class="w-full h-40 object-cover rounded-xl border border-zinc-800 mb-2 opacity-50">
-                    <button onclick="document.getElementById('edit-file').click()" class="absolute inset-0 flex items-center justify-center text-[10px] uppercase font-bold tracking-widest text-white/50 group-hover:text-white transition-all">
-                        更換照片
-                    </button>
+                <input type="text" id="edit-title" class="w-full bg-black border border-zinc-800 p-4 rounded-xl text-white outline-none">
+                <select id="edit-cat" class="w-full bg-black border border-zinc-800 p-4 rounded-xl text-white outline-none">
+                    <option value="">無分類</option>
+                </select>
+                <div class="relative group h-40 overflow-hidden rounded-xl border border-zinc-800">
+                    <img id="edit-preview" src="" class="w-full h-full object-cover opacity-50">
+                    <button onclick="document.getElementById('edit-file').click()" class="absolute inset-0 flex items-center justify-center text-[10px] uppercase font-bold text-white/50 group-hover:text-white transition-all">更換照片</button>
                     <input type="file" id="edit-file" accept="image/*" onchange="window.processImg(this, 'edit')" class="hidden">
                 </div>
-
-                <textarea id="edit-desc" class="w-full bg-black border border-zinc-800 p-4 rounded-xl h-32 text-white outline-none focus:border-yellow-500/50" placeholder="修改內容描述"></textarea>
-                
+                <textarea id="edit-desc" class="w-full bg-black border border-zinc-800 p-4 rounded-xl h-32 text-white outline-none"></textarea>
                 <div class="flex gap-4 pt-4">
-                    <button onclick="window.saveEdit()" class="flex-1 bg-gold text-black font-black py-4 rounded-xl uppercase tracking-widest shadow-lg active:scale-95 transition-all">保存更改</button>
-                    <button onclick="window.closeEdit()" class="flex-1 bg-zinc-900 text-zinc-500 font-bold py-4 rounded-xl uppercase tracking-widest hover:text-white transition-all">取消</button>
+                    <button onclick="window.saveEdit()" class="flex-1 bg-gold text-black font-black py-4 rounded-xl uppercase tracking-widest">保存更改</button>
+                    <button onclick="window.closeEdit()" class="flex-1 bg-zinc-900 text-zinc-500 font-bold py-4 rounded-xl uppercase tracking-widest">取消</button>
                 </div>
             </div>
         </div>
@@ -205,64 +175,176 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        let db, auth, imgData = null, editImgData = null, editingId = null, isAdmin = false;
-        let sortOldestFirst = true;
-        let currentItems = [];
-        const collectionPath = "eagrote_production_vault"; 
+        let db, auth, isAdmin = false;
+        let imgData = null, editImgData = null, editingId = null;
+        let allProjects = [], allCategories = [], currentFilter = 'all';
 
-        // 初始化 Firebase
-        try {
-            const app = initializeApp(window.firebaseConfig);
-            auth = getAuth(app);
-            db = getFirestore(app);
+        const COLL_PROJECTS = "eagrote_production_vault";
+        const COLL_CATEGORIES = "eagrote_categories";
 
-            onAuthStateChanged(auth, (user) => {
-                if (user) { startRealtimeSync(); } 
-                else { signInAnonymously(auth); }
+        // 初始化
+        const app = initializeApp(window.firebaseConfig);
+        auth = getAuth(app);
+        db = getFirestore(app);
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) { 
+                startSync(); 
+            } else { 
+                signInAnonymously(auth); 
+            }
+        });
+
+        function startSync() {
+            // 監聽項目
+            onSnapshot(collection(db, COLL_PROJECTS), (snap) => {
+                allProjects = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                renderAll();
             });
-        } catch (e) { showError("系統初始化失敗，請檢查網路連線。"); }
-
-        // 即時同步數據
-        function startRealtimeSync() {
-            onSnapshot(collection(db, collectionPath), (snap) => {
-                currentItems = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                applySortAndRender();
-                document.getElementById('error-display').style.display = 'none';
-            }, (err) => {
-                showError("同步失敗: 請確認資料庫權限已開啟。");
+            // 監聽分類
+            onSnapshot(collection(db, COLL_CATEGORIES), (snap) => {
+                allCategories = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                renderCategories();
             });
         }
 
-        // 切換排序
-        window.toggleSort = () => {
-            sortOldestFirst = !sortOldestFirst;
-            document.getElementById('sort-label').innerText = sortOldestFirst ? "最早靠上" : "最新靠上";
-            applySortAndRender();
+        // --- 分類功能 ---
+        window.addCategory = async () => {
+            const name = document.getElementById('new-cat-name').value.trim();
+            if (!name) return;
+            try {
+                await addDoc(collection(db, COLL_CATEGORIES), { name, createdAt: Date.now() });
+                document.getElementById('new-cat-name').value = "";
+            } catch (e) { alert("新增分類失敗"); }
         };
 
-        function applySortAndRender() {
-            const sorted = [...currentItems].sort((a, b) => sortOldestFirst ? a.time - b.time : b.time - a.time);
-            render(sorted);
+        window.removeCategory = async (id) => {
+            if (!confirm("刪除分類不會刪除作品，但作品將變為無分類。確定嗎？")) return;
+            await deleteDoc(doc(db, COLL_CATEGORIES, id));
+        };
+
+        window.setFilter = (catId) => {
+            currentFilter = catId;
+            document.querySelectorAll('.cat-tag').forEach(tag => {
+                tag.classList.toggle('active', tag.dataset.cat === catId);
+            });
+            renderAll();
+        };
+
+        function renderCategories() {
+            // 渲染後台清單
+            const adminList = document.getElementById('admin-cat-list');
+            adminList.innerHTML = allCategories.map(c => `
+                <div class="flex justify-between items-center bg-black/40 p-3 rounded-xl border border-white/5">
+                    <span class="text-xs font-bold text-zinc-300">${c.name}</span>
+                    <button onclick="window.removeCategory('${c.id}')" class="text-[10px] text-red-500/50 hover:text-red-500">REMOVE</button>
+                </div>
+            `).join('');
+
+            // 渲染下拉選單 (新增與編輯)
+            const options = `<option value="">無分類</option>` + allCategories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+            document.getElementById('p-cat').innerHTML = options;
+            document.getElementById('edit-cat').innerHTML = options;
+
+            // 渲染前台濾鏡
+            const filterBar = document.getElementById('filter-bar');
+            const allBtn = `<div onclick="window.setFilter('all')" class="cat-tag ${currentFilter==='all'?'active':''} px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest" data-cat="all">All Archive</div>`;
+            const catBtns = allCategories.map(c => `
+                <div onclick="window.setFilter('${c.id}')" class="cat-tag ${currentFilter===c.id?'active':''} px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest" data-cat="${c.id}">${c.name}</div>
+            `).join('');
+            filterBar.innerHTML = allBtn + catBtns;
         }
 
-        // 燈箱放大功能
-        window.openLightbox = (src) => {
-            const lb = document.getElementById('lightbox');
-            const lbImg = document.getElementById('lightbox-img');
-            lbImg.src = src;
-            lb.classList.add('active');
-            document.body.style.overflow = 'hidden'; 
+        // --- 作品功能 ---
+        function renderAll() {
+            const filtered = currentFilter === 'all' 
+                ? allProjects 
+                : allProjects.filter(p => p.categoryId === currentFilter);
+            
+            const sorted = filtered.sort((a,b) => b.time - a.time);
+            const list = document.getElementById('list');
+            
+            if (sorted.length === 0) {
+                list.innerHTML = `<div class="col-span-full py-20 text-center text-zinc-800 border border-dashed border-white/5 rounded-[3rem] uppercase tracking-widest text-[10px]">No content in this category</div>`;
+                return;
+            }
+
+            list.innerHTML = sorted.map(i => {
+                const cat = allCategories.find(c => c.id === i.categoryId);
+                return `
+                    <div class="bg-zinc-900/30 border border-white/5 rounded-[2.5rem] overflow-hidden group hover:border-yellow-500/20 transition-all duration-500 flex flex-col">
+                        <div class="h-64 overflow-hidden relative cursor-zoom-in" onclick="window.openLightbox('${i.img}')">
+                            <img src="${i.img}" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all">
+                            <div class="absolute top-4 left-4 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 text-[8px] font-bold text-yellow-500 tracking-widest uppercase">
+                                ${cat ? cat.name : 'Uncategorized'}
+                            </div>
+                            ${isAdmin ? `
+                                <div class="absolute top-4 right-4 flex gap-2">
+                                    <button onclick="event.stopPropagation(); window.openEdit('${i.id}')" class="bg-yellow-500 text-black text-[10px] px-3 py-1 rounded-full font-black">EDIT</button>
+                                    <button onclick="event.stopPropagation(); window.removeDoc('${i.id}')" class="bg-red-600 text-white text-[10px] px-3 py-1 rounded-full">WIPE</button>
+                                </div>
+                            ` : ''}
+                        </div>
+                        <div class="p-8">
+                            <h4 class="gold-gradient font-black text-xl tracking-widest uppercase mb-2">${i.title}</h4>
+                            <p class="text-zinc-500 text-xs leading-relaxed font-light line-clamp-2">${i.desc || 'No description available.'}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        window.upload = async () => {
+            const title = document.getElementById('p-title').value;
+            const categoryId = document.getElementById('p-cat').value;
+            const desc = document.getElementById('p-desc').value;
+            if (!title || !imgData) return alert("標題與照片為必填");
+
+            try {
+                await addDoc(collection(db, COLL_PROJECTS), { 
+                    title, desc, categoryId, img: imgData, time: Date.now() 
+                });
+                document.getElementById('p-title').value = "";
+                document.getElementById('p-desc').value = "";
+                imgData = null;
+                document.getElementById('file-label').innerText = "選取媒體";
+            } catch (e) { alert("上傳失敗"); }
         };
 
-        window.closeLightbox = () => {
-            const lb = document.getElementById('lightbox');
-            lb.classList.remove('active');
-            document.body.style.overflow = 'auto';
+        window.openEdit = (id) => {
+            const item = allProjects.find(i => i.id === id);
+            if (!item) return;
+            editingId = id;
+            editImgData = item.img;
+            document.getElementById('edit-title').value = item.title;
+            document.getElementById('edit-cat').value = item.categoryId || "";
+            document.getElementById('edit-desc').value = item.desc || "";
+            document.getElementById('edit-preview').src = item.img;
+            document.getElementById('edit-modal').style.display = 'flex';
         };
 
-        // 圖片處理
+        window.saveEdit = async () => {
+            if (!editingId) return;
+            try {
+                await updateDoc(doc(db, COLL_PROJECTS, editingId), {
+                    title: document.getElementById('edit-title').value,
+                    categoryId: document.getElementById('edit-cat').value,
+                    desc: document.getElementById('edit-desc').value,
+                    img: editImgData
+                });
+                window.closeEdit();
+            } catch (e) { alert("更新失敗"); }
+        };
+
+        window.closeEdit = () => { document.getElementById('edit-modal').style.display = 'none'; editingId = null; };
+        
+        window.removeDoc = async (id) => {
+            if (confirm("確認銷毀此紀錄？")) await deleteDoc(doc(db, COLL_PROJECTS, id));
+        };
+
+        // --- 通用與驗證 ---
         window.processImg = (input, mode) => {
             const file = input.files[0];
             if (!file) return;
@@ -271,7 +353,7 @@
                 const img = new Image();
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
-                    const targetSize = 1080; 
+                    const targetSize = 1080;
                     let w = img.width, h = img.height;
                     if (w > h) { h = (targetSize/w)*h; w = targetSize; } else { w = (targetSize/h)*w; h = targetSize; }
                     canvas.width = w; canvas.height = h;
@@ -283,7 +365,6 @@
                     } else {
                         imgData = compressed;
                         document.getElementById('file-label').innerText = "媒體已就緒";
-                        document.getElementById('file-label').classList.add('text-yellow-500');
                     }
                 };
                 img.src = e.target.result;
@@ -291,110 +372,22 @@
             reader.readAsDataURL(file);
         };
 
-        // 上傳數據
-        window.upload = async () => {
-            const title = document.getElementById('p-title').value;
-            const desc = document.getElementById('p-desc').value;
-            const btn = document.getElementById('upload-btn');
-            if (!title || !imgData) return alert("標題與照片為必填項目。");
-
-            btn.disabled = true;
-            try {
-                await addDoc(collection(db, collectionPath), { title, desc, img: imgData, time: Date.now() });
-                document.getElementById('p-title').value = "";
-                document.getElementById('p-desc').value = "";
-                imgData = null;
-                document.getElementById('file-label').innerText = "選取媒體內容";
-                document.getElementById('file-label').classList.remove('text-yellow-500');
-            } catch (e) { alert("同步失敗。"); }
-            btn.disabled = false;
-        };
-
-        // 編輯功能
-        window.openEdit = (id) => {
-            const item = currentItems.find(i => i.id === id);
-            if (!item) return;
-            editingId = id;
-            editImgData = item.img;
-            document.getElementById('edit-title').value = item.title;
-            document.getElementById('edit-desc').value = item.desc || "";
-            document.getElementById('edit-preview').src = item.img;
-            document.getElementById('edit-modal').style.display = 'flex';
-        };
-
-        window.closeEdit = () => {
-            document.getElementById('edit-modal').style.display = 'none';
-            editingId = null;
-            editImgData = null;
-        };
-
-        window.saveEdit = async () => {
-            if (!editingId) return;
-            const title = document.getElementById('edit-title').value;
-            const desc = document.getElementById('edit-desc').value;
-            
-            try {
-                await updateDoc(doc(db, collectionPath, editingId), {
-                    title, desc, img: editImgData
-                });
-                window.closeEdit();
-            } catch (e) { alert("更新失敗。"); }
-        };
-
-        // 渲染列表
-        function render(items) {
-            const list = document.getElementById('list');
-            if (items.length === 0) {
-                list.innerHTML = `<div class="col-span-full py-20 text-center text-zinc-800 border border-dashed border-white/5 rounded-[3rem] uppercase tracking-[1em] text-[10px]">Vault is Empty</div>`;
-                return;
-            }
-            list.innerHTML = items.map(i => `
-                <div class="bg-zinc-900/30 border border-white/5 rounded-[2.5rem] overflow-hidden group hover:border-yellow-500/20 transition-all duration-500 flex flex-col">
-                    <div class="h-64 overflow-hidden relative cursor-zoom-in" onclick="window.openLightbox('${i.img}')">
-                        <img src="${i.img}" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700">
-                        <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <span class="text-white text-[10px] font-bold tracking-[0.4em] uppercase bg-black/50 px-4 py-2 rounded-full backdrop-blur-sm border border-white/10">Expand View</span>
-                        </div>
-                        ${isAdmin ? `
-                            <div class="absolute top-4 right-4 flex gap-2 z-10">
-                                <button onclick="event.stopPropagation(); window.openEdit('${i.id}')" class="bg-yellow-500/80 hover:bg-yellow-500 text-black text-[10px] px-3 py-1 rounded-full backdrop-blur-md shadow-xl transition-all font-black">EDIT</button>
-                                <button onclick="event.stopPropagation(); window.removeDoc('${i.id}')" class="bg-red-600/80 hover:bg-red-600 text-white text-[10px] px-3 py-1 rounded-full backdrop-blur-md shadow-xl transition-all">WIPE</button>
-                            </div>
-                        ` : ''}
-                    </div>
-                    <div class="p-8">
-                        <div class="text-[8px] text-zinc-700 uppercase tracking-widest mb-3">${new Date(i.time).toLocaleString()}</div>
-                        <h4 class="gold-gradient font-black text-xl tracking-widest uppercase mb-3">${i.title}</h4>
-                        <p class="text-zinc-500 text-xs leading-relaxed font-light">${i.desc || 'No description available.'}</p>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // 刪除文件
-        window.removeDoc = async (id) => {
-            if (confirm("確認銷毀此數據紀錄？此動作無法復原。")) {
-                await deleteDoc(doc(db, collectionPath, id));
-            }
-        };
-
-        function showError(msg) {
-            const box = document.getElementById('error-display');
-            box.innerText = msg; box.style.display = 'block';
-        }
-
-        // 管理權限驗證
         window.verify = () => {
             if (document.getElementById('admin-pass').value === "97120719") {
                 isAdmin = true;
                 document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
                 window.closeLogin();
-                applySortAndRender();
-            } else { alert("ACCESS DENIED: 授權錯誤。"); }
+                renderAll();
+            } else { alert("ACCESS DENIED"); }
         };
 
         window.openLogin = () => document.getElementById('login-modal').style.display = 'flex';
         window.closeLogin = () => document.getElementById('login-modal').style.display = 'none';
+        window.openLightbox = (src) => {
+            document.getElementById('lightbox-img').src = src;
+            document.getElementById('lightbox').classList.add('active');
+        };
+        window.closeLightbox = () => document.getElementById('lightbox').classList.remove('active');
     </script>
 </body>
 </html>
