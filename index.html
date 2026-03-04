@@ -31,7 +31,6 @@
         
         .bg-gold { background: linear-gradient(135deg, #BF953F, #FCF6BA, #AA771C); }
         .admin-only { display: none; }
-        .error-box { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #ef4444; padding: 15px; border-radius: 12px; margin-top: 20px; font-size: 13px; display: none; }
         
         .glow-bg { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 100%; height: 600px; background: radial-gradient(circle at center, rgba(191, 149, 63, 0.1) 0%, transparent 70%); z-index: -1; pointer-events: none; }
 
@@ -52,11 +51,17 @@
             transition: all 0.3s ease;
             cursor: pointer;
             border: 1px solid rgba(255,255,255,0.05);
+            background: rgba(255,255,255,0.02);
         }
         .cat-tag.active {
             background: #BF953F;
             color: black;
             border-color: #FCF6BA;
+        }
+
+        .sort-btn {
+            transition: all 0.3s ease;
+            border: 1px solid rgba(191, 149, 63, 0.3);
         }
     </style>
 </head>
@@ -90,7 +95,7 @@
         </div>
     </section>
 
-    <!-- 管理員後台 (Admin Only) -->
+    <!-- 管理員後台 -->
     <section class="max-w-5xl mx-auto px-6 mb-20">
         <div id="admin-panel" class="admin-only space-y-8 p-10 bg-zinc-900/60 rounded-[3rem] border border-yellow-500/30 shadow-2xl backdrop-blur-md">
             <div class="grid md:grid-cols-2 gap-12">
@@ -98,19 +103,17 @@
                 <div>
                     <h2 class="text-yellow-500 font-black mb-6 tracking-[0.3em] uppercase text-xs">Categories Management</h2>
                     <div class="flex gap-2 mb-4">
-                        <input type="text" id="new-cat-name" placeholder="新分類名稱" class="flex-1 bg-black border border-zinc-800 p-3 rounded-xl text-sm outline-none">
-                        <button onclick="window.addCategory()" class="bg-yellow-600 px-4 py-2 rounded-xl text-black font-bold text-xs">新增</button>
+                        <input type="text" id="new-cat-name" placeholder="新分類名稱" class="flex-1 bg-black border border-zinc-800 p-3 rounded-xl text-sm outline-none text-white">
+                        <button onclick="window.addCategory()" class="bg-yellow-600 px-4 py-2 rounded-xl text-black font-bold text-xs hover:bg-yellow-500">新增</button>
                     </div>
-                    <div id="admin-cat-list" class="space-y-2 max-h-48 overflow-y-auto pr-2">
-                        <!-- 分類清單 -->
-                    </div>
+                    <div id="admin-cat-list" class="space-y-2 max-h-48 overflow-y-auto pr-2"></div>
                 </div>
 
                 <!-- 內容發佈 -->
                 <div>
                     <h2 class="text-yellow-500 font-black mb-6 tracking-[0.3em] uppercase text-xs">Archive New Content</h2>
                     <div class="space-y-4">
-                        <input type="text" id="p-title" placeholder="紀錄標題" class="w-full bg-black border border-zinc-800 p-4 rounded-xl text-sm outline-none">
+                        <input type="text" id="p-title" placeholder="紀錄標題" class="w-full bg-black border border-zinc-800 p-4 rounded-xl text-sm outline-none text-white">
                         <select id="p-cat" class="w-full bg-black border border-zinc-800 p-4 rounded-xl text-sm outline-none text-zinc-400">
                             <option value="">選擇分類...</option>
                         </select>
@@ -118,24 +121,34 @@
                             <button onclick="document.getElementById('p-file').click()" class="flex-1 bg-zinc-800/50 p-4 rounded-xl text-zinc-400 text-xs border border-dashed border-zinc-700" id="file-label">選取媒體</button>
                             <input type="file" id="p-file" accept="image/*" onchange="window.processImg(this, 'new')" class="hidden">
                         </div>
-                        <textarea id="p-desc" placeholder="詳細內容描述..." class="w-full bg-black border border-zinc-800 p-4 rounded-xl h-24 text-sm outline-none"></textarea>
-                        <button id="upload-btn" onclick="window.upload()" class="w-full bg-gold text-black font-black py-4 rounded-xl uppercase tracking-[0.2em] text-sm">發佈至雲端</button>
+                        <textarea id="p-desc" placeholder="詳細內容描述..." class="w-full bg-black border border-zinc-800 p-4 rounded-xl h-24 text-sm outline-none text-white"></textarea>
+                        <button id="upload-btn" onclick="window.upload()" class="w-full bg-gold text-black font-black py-4 rounded-xl uppercase tracking-[0.2em] text-sm hover:scale-[1.01] active:scale-95 transition-all">發佈至雲端</button>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- 雲端紀錄列表區 -->
+    <!-- 雲端紀錄列表控制區 -->
     <section class="max-w-6xl mx-auto px-6 py-10">
-        <!-- 分類濾鏡導覽 -->
-        <div id="filter-bar" class="flex flex-wrap gap-3 mb-12 justify-center md:justify-start">
-            <div onclick="window.setFilter('all')" class="cat-tag active px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest" data-cat="all">All Archive</div>
-            <!-- 動態插入分類標籤 -->
+        <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-6">
+            <div class="flex-1">
+                <h2 class="text-2xl font-black font-montserrat gold-gradient uppercase tracking-widest mb-6">Cloud Archive</h2>
+                <!-- 分類濾鏡 -->
+                <div id="filter-bar" class="flex flex-wrap gap-3">
+                    <div onclick="window.setFilter('all')" class="cat-tag active px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest" data-cat="all">All Archive</div>
+                </div>
+            </div>
+            
+            <!-- 排序控制 -->
+            <button id="toggle-sort" onclick="window.toggleSort()" class="sort-btn px-6 py-2.5 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase text-yellow-500 flex items-center gap-2 hover:bg-yellow-500/10">
+                <span id="sort-label">最早靠上</span>
+                <svg id="sort-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg>
+            </button>
         </div>
 
         <div id="list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <!-- 內容 -->
+            <!-- 內容載入區 -->
         </div>
     </section>
 
@@ -158,7 +171,7 @@
                 <select id="edit-cat" class="w-full bg-black border border-zinc-800 p-4 rounded-xl text-white outline-none">
                     <option value="">無分類</option>
                 </select>
-                <div class="relative group h-40 overflow-hidden rounded-xl border border-zinc-800">
+                <div class="relative group h-48 overflow-hidden rounded-xl border border-zinc-800">
                     <img id="edit-preview" src="" class="w-full h-full object-cover opacity-50">
                     <button onclick="document.getElementById('edit-file').click()" class="absolute inset-0 flex items-center justify-center text-[10px] uppercase font-bold text-white/50 group-hover:text-white transition-all">更換照片</button>
                     <input type="file" id="edit-file" accept="image/*" onchange="window.processImg(this, 'edit')" class="hidden">
@@ -175,11 +188,11 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         let db, auth, isAdmin = false;
         let imgData = null, editImgData = null, editingId = null;
-        let allProjects = [], allCategories = [], currentFilter = 'all';
+        let allProjects = [], allCategories = [], currentFilter = 'all', sortNewest = false; // 預設改為 false (最早靠上)
 
         const COLL_PROJECTS = "eagrote_production_vault";
         const COLL_CATEGORIES = "eagrote_categories";
@@ -190,41 +203,29 @@
         db = getFirestore(app);
 
         onAuthStateChanged(auth, (user) => {
-            if (user) { 
-                startSync(); 
-            } else { 
-                signInAnonymously(auth); 
-            }
+            if (user) startSync();
+            else signInAnonymously(auth);
         });
 
         function startSync() {
-            // 監聽項目
             onSnapshot(collection(db, COLL_PROJECTS), (snap) => {
                 allProjects = snap.docs.map(d => ({id: d.id, ...d.data()}));
                 renderAll();
             });
-            // 監聽分類
             onSnapshot(collection(db, COLL_CATEGORIES), (snap) => {
                 allCategories = snap.docs.map(d => ({id: d.id, ...d.data()}));
                 renderCategories();
             });
         }
 
-        // --- 分類功能 ---
-        window.addCategory = async () => {
-            const name = document.getElementById('new-cat-name').value.trim();
-            if (!name) return;
-            try {
-                await addDoc(collection(db, COLL_CATEGORIES), { name, createdAt: Date.now() });
-                document.getElementById('new-cat-name').value = "";
-            } catch (e) { alert("新增分類失敗"); }
+        // --- 排序切換 ---
+        window.toggleSort = () => {
+            sortNewest = !sortNewest;
+            document.getElementById('sort-label').innerText = sortNewest ? "最新靠上" : "最早靠上";
+            renderAll();
         };
 
-        window.removeCategory = async (id) => {
-            if (!confirm("刪除分類不會刪除作品，但作品將變為無分類。確定嗎？")) return;
-            await deleteDoc(doc(db, COLL_CATEGORIES, id));
-        };
-
+        // --- 分類切換 ---
         window.setFilter = (catId) => {
             currentFilter = catId;
             document.querySelectorAll('.cat-tag').forEach(tag => {
@@ -233,8 +234,18 @@
             renderAll();
         };
 
+        window.addCategory = async () => {
+            const name = document.getElementById('new-cat-name').value.trim();
+            if (!name) return;
+            await addDoc(collection(db, COLL_CATEGORIES), { name, createdAt: Date.now() });
+            document.getElementById('new-cat-name').value = "";
+        };
+
+        window.removeCategory = async (id) => {
+            if (confirm("刪除分類不會刪除作品。確定？")) await deleteDoc(doc(db, COLL_CATEGORIES, id));
+        };
+
         function renderCategories() {
-            // 渲染後台清單
             const adminList = document.getElementById('admin-cat-list');
             adminList.innerHTML = allCategories.map(c => `
                 <div class="flex justify-between items-center bg-black/40 p-3 rounded-xl border border-white/5">
@@ -243,12 +254,10 @@
                 </div>
             `).join('');
 
-            // 渲染下拉選單 (新增與編輯)
             const options = `<option value="">無分類</option>` + allCategories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
             document.getElementById('p-cat').innerHTML = options;
             document.getElementById('edit-cat').innerHTML = options;
 
-            // 渲染前台濾鏡
             const filterBar = document.getElementById('filter-bar');
             const allBtn = `<div onclick="window.setFilter('all')" class="cat-tag ${currentFilter==='all'?'active':''} px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest" data-cat="all">All Archive</div>`;
             const catBtns = allCategories.map(c => `
@@ -257,17 +266,18 @@
             filterBar.innerHTML = allBtn + catBtns;
         }
 
-        // --- 作品功能 ---
+        // --- 作品渲染 ---
         function renderAll() {
-            const filtered = currentFilter === 'all' 
+            let filtered = currentFilter === 'all' 
                 ? allProjects 
                 : allProjects.filter(p => p.categoryId === currentFilter);
             
-            const sorted = filtered.sort((a,b) => b.time - a.time);
-            const list = document.getElementById('list');
+            // 同時執行排序與濾鏡
+            const sorted = filtered.sort((a,b) => sortNewest ? b.time - a.time : a.time - b.time);
             
+            const list = document.getElementById('list');
             if (sorted.length === 0) {
-                list.innerHTML = `<div class="col-span-full py-20 text-center text-zinc-800 border border-dashed border-white/5 rounded-[3rem] uppercase tracking-widest text-[10px]">No content in this category</div>`;
+                list.innerHTML = `<div class="col-span-full py-20 text-center text-zinc-800 border border-dashed border-white/5 rounded-[3rem] uppercase tracking-widest text-[10px]">No records found</div>`;
                 return;
             }
 
@@ -278,7 +288,7 @@
                         <div class="h-64 overflow-hidden relative cursor-zoom-in" onclick="window.openLightbox('${i.img}')">
                             <img src="${i.img}" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all">
                             <div class="absolute top-4 left-4 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 text-[8px] font-bold text-yellow-500 tracking-widest uppercase">
-                                ${cat ? cat.name : 'Uncategorized'}
+                                ${cat ? cat.name : 'General'}
                             </div>
                             ${isAdmin ? `
                                 <div class="absolute top-4 right-4 flex gap-2">
@@ -288,8 +298,9 @@
                             ` : ''}
                         </div>
                         <div class="p-8">
+                            <div class="text-[8px] text-zinc-700 uppercase tracking-widest mb-2">${new Date(i.time).toLocaleDateString()}</div>
                             <h4 class="gold-gradient font-black text-xl tracking-widest uppercase mb-2">${i.title}</h4>
-                            <p class="text-zinc-500 text-xs leading-relaxed font-light line-clamp-2">${i.desc || 'No description available.'}</p>
+                            <p class="text-zinc-500 text-xs leading-relaxed font-light line-clamp-3">${i.desc || ''}</p>
                         </div>
                     </div>
                 `;
@@ -300,17 +311,15 @@
             const title = document.getElementById('p-title').value;
             const categoryId = document.getElementById('p-cat').value;
             const desc = document.getElementById('p-desc').value;
-            if (!title || !imgData) return alert("標題與照片為必填");
+            if (!title || !imgData) return alert("Missing Title or Image");
 
-            try {
-                await addDoc(collection(db, COLL_PROJECTS), { 
-                    title, desc, categoryId, img: imgData, time: Date.now() 
-                });
-                document.getElementById('p-title').value = "";
-                document.getElementById('p-desc').value = "";
-                imgData = null;
-                document.getElementById('file-label').innerText = "選取媒體";
-            } catch (e) { alert("上傳失敗"); }
+            await addDoc(collection(db, COLL_PROJECTS), { 
+                title, desc, categoryId, img: imgData, time: Date.now() 
+            });
+            document.getElementById('p-title').value = "";
+            document.getElementById('p-desc').value = "";
+            imgData = null;
+            document.getElementById('file-label').innerText = "選取媒體";
         };
 
         window.openEdit = (id) => {
@@ -326,25 +335,21 @@
         };
 
         window.saveEdit = async () => {
-            if (!editingId) return;
-            try {
-                await updateDoc(doc(db, COLL_PROJECTS, editingId), {
-                    title: document.getElementById('edit-title').value,
-                    categoryId: document.getElementById('edit-cat').value,
-                    desc: document.getElementById('edit-desc').value,
-                    img: editImgData
-                });
-                window.closeEdit();
-            } catch (e) { alert("更新失敗"); }
+            await updateDoc(doc(db, COLL_PROJECTS, editingId), {
+                title: document.getElementById('edit-title').value,
+                categoryId: document.getElementById('edit-cat').value,
+                desc: document.getElementById('edit-desc').value,
+                img: editImgData
+            });
+            window.closeEdit();
         };
 
         window.closeEdit = () => { document.getElementById('edit-modal').style.display = 'none'; editingId = null; };
         
         window.removeDoc = async (id) => {
-            if (confirm("確認銷毀此紀錄？")) await deleteDoc(doc(db, COLL_PROJECTS, id));
+            if (confirm("Destroy this data?")) await deleteDoc(doc(db, COLL_PROJECTS, id));
         };
 
-        // --- 通用與驗證 ---
         window.processImg = (input, mode) => {
             const file = input.files[0];
             if (!file) return;
@@ -358,14 +363,9 @@
                     if (w > h) { h = (targetSize/w)*h; w = targetSize; } else { w = (targetSize/h)*w; h = targetSize; }
                     canvas.width = w; canvas.height = h;
                     canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                    const compressed = canvas.toDataURL('image/jpeg', 0.7);
-                    if (mode === 'edit') {
-                        editImgData = compressed;
-                        document.getElementById('edit-preview').src = compressed;
-                    } else {
-                        imgData = compressed;
-                        document.getElementById('file-label').innerText = "媒體已就緒";
-                    }
+                    const res = canvas.toDataURL('image/jpeg', 0.7);
+                    if (mode === 'edit') { editImgData = res; document.getElementById('edit-preview').src = res; }
+                    else { imgData = res; document.getElementById('file-label').innerText = "Ready"; }
                 };
                 img.src = e.target.result;
             };
