@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EAGROTE | Official Cloud Hub & 3D Archive</title>
+    <title>EAGROTE | Official Cloud Hub</title>
 
     <!-- Firebase 配置 -->
     <script>
@@ -17,14 +17,8 @@
         };
     </script>
 
-    <!-- 外部資源 -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <!-- OBJ 載入器擴展 -->
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
-    
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700;900&family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
-    
     <style>
         body { font-family: 'Noto Sans TC', sans-serif; background-color: #000; color: #fff; scroll-behavior: smooth; overflow-x: hidden; }
         .font-montserrat { font-family: 'Montserrat', sans-serif; }
@@ -38,42 +32,46 @@
         .bg-gold { background: linear-gradient(135deg, #BF953F, #FCF6BA, #AA771C); }
         .admin-only { display: none; }
         
-        .glow-bg { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 100%; height: 800px; background: radial-gradient(circle at center, rgba(191, 149, 63, 0.08) 0%, transparent 70%); z-index: -1; pointer-events: none; }
+        .glow-bg { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 100%; height: 600px; background: radial-gradient(circle at center, rgba(191, 149, 63, 0.1) 0%, transparent 70%); z-index: -1; pointer-events: none; }
 
-        /* 3D 容器樣式 */
-        #three-container {
-            width: 100%;
-            height: 500px;
-            cursor: grab;
-            background: radial-gradient(circle at center, #0a0a0a 0%, #000 100%);
-            border-radius: 3rem;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            overflow: hidden;
-            position: relative;
+        #lightbox {
+            display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.95);
+            z-index: 200; cursor: zoom-out; align-items: center; justify-content: center;
+            backdrop-filter: blur(10px); padding: 20px;
         }
-        #three-container:active { cursor: grabbing; }
-        
-        .model-info {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            font-family: 'Montserrat', sans-serif;
-            font-size: 10px;
-            letter-spacing: 2px;
-            color: rgba(255,255,255,0.3);
-            text-transform: uppercase;
+        #lightbox img {
+            max-width: 95%; max-height: 95%; border-radius: 8px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8); transform: scale(0.9);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
-
-        /* 列表樣式與你原本的一致 */
-        .cat-tag { transition: all 0.3s ease; cursor: pointer; border: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.02); }
-        .cat-tag.active { background: #BF953F; color: black; border-color: #FCF6BA; }
-        #lightbox { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.95); z-index: 200; cursor: zoom-out; align-items: center; justify-content: center; backdrop-filter: blur(10px); padding: 20px; }
         #lightbox.active { display: flex; }
+        #lightbox.active img { transform: scale(1); }
+
+        .cat-tag {
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.05);
+            background: rgba(255,255,255,0.02);
+        }
+        .cat-tag.active {
+            background: #BF953F;
+            color: black;
+            border-color: #FCF6BA;
+        }
+
+        .sort-btn {
+            transition: all 0.3s ease;
+            border: 1px solid rgba(191, 149, 63, 0.3);
+        }
     </style>
 </head>
 <body>
 
     <div class="glow-bg"></div>
+
+    <div id="lightbox" onclick="window.closeLightbox()">
+        <img id="lightbox-img" src="" alt="Enlarged view">
+    </div>
 
     <!-- 導覽列 -->
     <nav class="fixed w-full z-50 bg-black/80 border-b border-white/5 backdrop-blur-xl">
@@ -82,7 +80,7 @@
                 <span class="text-2xl font-black font-montserrat tracking-[0.25em] gold-gradient">EAGROTE</span>
             </div>
             <div class="flex items-center gap-4">
-                <a href="#three-section" class="hidden md:block text-zinc-400 hover:text-yellow-500 transition-all text-[10px] tracking-[0.2em] font-bold uppercase">3D Archive</a>
+                <a href="#founder-section" class="hidden md:block text-zinc-400 hover:text-yellow-500 transition-all text-[10px] tracking-[0.2em] font-bold uppercase">Founder Info</a>
                 <button onclick="window.openLogin()" class="text-zinc-500 hover:text-white transition-all uppercase text-[10px] tracking-[0.3em] font-bold border border-white/10 px-5 py-2 rounded-full hover:bg-white/5">
                     Authentication
                 </button>
@@ -90,50 +88,32 @@
         </div>
     </nav>
 
-    <!-- 主視覺區塊 -->
-    <section class="pt-48 pb-10 px-6 text-center">
+    <!-- 主視覺區塊 (Hero) -->
+    <section class="pt-56 pb-20 px-6 text-center">
         <div class="max-w-4xl mx-auto">
             <div class="inline-block px-4 py-1 border border-yellow-500/30 rounded-full text-[10px] text-yellow-500 font-bold tracking-[0.4em] uppercase mb-8">
-                Official Digital & 3D Archive
+                Official Digital Archive
             </div>
             <h1 class="text-5xl md:text-8xl font-black font-montserrat mb-8 gold-gradient uppercase tracking-tighter leading-tight">力量 · 希望 · 不屈</h1>
         </div>
     </section>
 
-    <!-- 3D 模型展示區塊 (新加入) -->
-    <section id="three-section" class="max-w-6xl mx-auto px-6 mb-20">
-        <div class="mb-10 text-center">
-            <h3 class="text-yellow-500 font-bold tracking-[0.4em] uppercase text-[10px] mb-2">3D Hardware Visualization</h3>
-            <h2 class="text-3xl font-black font-montserrat gold-gradient uppercase">零件與電路模型庫</h2>
-        </div>
-        
-        <div id="three-container">
-            <div class="model-info">INTERACT TO ROTATE / SCROLL TO ZOOM</div>
-            <div id="loading-overlay" class="absolute inset-0 flex items-center justify-center bg-black/50 z-10 hidden">
-                <span class="text-[10px] tracking-[0.5em] text-yellow-500 animate-pulse">LOADING OBJ DATA...</span>
-            </div>
-        </div>
-
-        <!-- 模型控制台 (管理員可見) -->
-        <div class="admin-only mt-6 p-6 bg-zinc-900/50 rounded-3xl border border-white/5 flex gap-4 items-center">
-            <span class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">上傳新 OBJ 模型:</span>
-            <input type="file" id="obj-upload" accept=".obj" class="text-xs text-zinc-400">
-            <p class="text-[9px] text-zinc-600 italic">註：此處僅為預覽切換，正式保存需整合至 Cloud Storage</p>
-        </div>
-    </section>
-
-    <!-- 創辦人核心區塊 -->
+    <!-- 創辦人核心區塊 (Founder Section) -->
     <section id="founder-section" class="max-w-6xl mx-auto px-6 py-24 border-t border-white/5">
         <div class="max-w-5xl mx-auto text-center space-y-20">
+            <!-- 視覺標題 -->
             <div class="space-y-4">
                 <h3 class="text-yellow-500 font-bold tracking-[0.4em] uppercase text-[10px]">The Visionary</h3>
                 <h2 class="text-4xl md:text-6xl font-black font-montserrat gold-gradient uppercase">創辦人核心</h2>
                 <div class="w-16 h-[2px] bg-gold mx-auto mt-4"></div>
             </div>
+            
+            <!-- 品牌願景 -->
             <p class="text-zinc-300 leading-relaxed text-lg md:text-2xl font-light italic max-w-3xl mx-auto">
-                「EAGROTE 的誕生源於對數位工藝的純粹追求。每一像素、每一行程式碼，每一件 3D 模型，都承載著我們對不屈精神的敬意。」
+                「EAGROTE 的誕生源於對數位工藝的純粹追求。我們不只是在建立紀錄，而是在雕琢一段屬於時代的歷史。每一像素、每一行程式碼，都承載著我們對不屈精神的敬意。」
             </p>
 
+            <!-- 個人聯繫資訊：修正後的網格佈局 -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-y-12 md:gap-x-12 py-12 border-y border-white/5">
                 <div class="flex flex-col items-center">
                     <span class="text-[9px] text-zinc-600 uppercase tracking-[0.3em] mb-3">Founder Name</span>
@@ -148,179 +128,282 @@
                     <a href="https://instagram.com/eagrote.tw" target="_blank" class="text-lg font-bold text-white tracking-widest hover:gold-gradient transition-all">@eagrote.tw</a>
                 </div>
             </div>
+
+            <!-- 核心指標：分開的容器避免重疊 -->
+            <div class="flex flex-wrap justify-center gap-12 md:gap-32">
+                <div class="text-center group">
+                    <div class="text-4xl font-black text-white group-hover:gold-gradient transition-all mb-2">2024</div>
+                    <div class="text-[10px] text-zinc-700 uppercase tracking-[0.4em]">Est. Year</div>
+                </div>
+                <div class="text-center group">
+                    <div class="text-4xl font-black text-white group-hover:gold-gradient transition-all mb-2">Infinity</div>
+                    <div class="text-[10px] text-zinc-700 uppercase tracking-[0.4em]">Innovation</div>
+                </div>
+                <div class="text-center group">
+                    <div class="text-4xl font-black text-white group-hover:gold-gradient transition-all mb-2">Pure</div>
+                    <div class="text-[10px] text-zinc-700 uppercase tracking-[0.4em]">Craftmanship</div>
+                </div>
+            </div>
         </div>
     </section>
 
-    <!-- 雲端紀錄列表 (Firebase) -->
+    <!-- 管理員後台 (保持原樣) -->
+    <section class="max-w-5xl mx-auto px-6 mb-20">
+        <div id="admin-panel" class="admin-only space-y-8 p-10 bg-zinc-900/60 rounded-[3rem] border border-yellow-500/30 shadow-2xl backdrop-blur-md">
+            <div class="grid md:grid-cols-2 gap-12">
+                <div>
+                    <h2 class="text-yellow-500 font-black mb-6 tracking-[0.3em] uppercase text-xs">Categories Management</h2>
+                    <div class="flex gap-2 mb-4">
+                        <input type="text" id="new-cat-name" placeholder="新分類名稱" class="flex-1 bg-black border border-zinc-800 p-3 rounded-xl text-sm outline-none text-white">
+                        <button onclick="window.addCategory()" class="bg-yellow-600 px-4 py-2 rounded-xl text-black font-bold text-xs hover:bg-yellow-500">新增</button>
+                    </div>
+                    <div id="admin-cat-list" class="space-y-2 max-h-48 overflow-y-auto pr-2"></div>
+                </div>
+                <div>
+                    <h2 class="text-yellow-500 font-black mb-6 tracking-[0.3em] uppercase text-xs">Archive New Content</h2>
+                    <div class="space-y-4">
+                        <input type="text" id="p-title" placeholder="紀錄標題" class="w-full bg-black border border-zinc-800 p-4 rounded-xl text-sm outline-none text-white">
+                        <select id="p-cat" class="w-full bg-black border border-zinc-800 p-4 rounded-xl text-sm outline-none text-zinc-400"></select>
+                        <div class="flex gap-4">
+                            <button onclick="document.getElementById('p-file').click()" class="flex-1 bg-zinc-800/50 p-4 rounded-xl text-zinc-400 text-xs border border-dashed border-zinc-700" id="file-label">選取媒體</button>
+                            <input type="file" id="p-file" accept="image/*" onchange="window.processImg(this, 'new')" class="hidden">
+                        </div>
+                        <textarea id="p-desc" placeholder="詳細內容描述..." class="w-full bg-black border border-zinc-800 p-4 rounded-xl h-24 text-sm outline-none text-white"></textarea>
+                        <button onclick="window.upload()" class="w-full bg-gold text-black font-black py-4 rounded-xl uppercase tracking-[0.2em] text-sm hover:scale-[1.01] transition-all">發佈至雲端</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 雲端紀錄列表控制區 (保持原樣) -->
     <section class="max-w-6xl mx-auto px-6 py-10">
         <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-6">
             <div class="flex-1">
                 <h2 class="text-2xl font-black font-montserrat gold-gradient uppercase tracking-widest mb-6">Cloud Archive</h2>
                 <div id="filter-bar" class="flex flex-wrap gap-3"></div>
             </div>
+            <button onclick="window.toggleSort()" class="sort-btn px-6 py-2.5 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase text-yellow-500 flex items-center gap-2 hover:bg-yellow-500/10">
+                <span id="sort-label">最早靠上</span>
+            </button>
         </div>
         <div id="list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
     </section>
 
-    <!-- 管理員面板 -->
-    <section class="max-w-5xl mx-auto px-6 mb-20">
-        <div id="admin-panel" class="admin-only space-y-8 p-10 bg-zinc-900/60 rounded-[3rem] border border-yellow-500/30 shadow-2xl backdrop-blur-md">
-             <!-- ... 原本的管理內容 ... -->
-             <h2 class="text-yellow-500 font-black mb-6 tracking-[0.3em] uppercase text-xs">Archive New Content</h2>
-             <div class="grid gap-4">
-                <input type="text" id="p-title" placeholder="紀錄標題" class="bg-black border border-zinc-800 p-4 rounded-xl text-white outline-none">
-                <button onclick="window.upload()" class="bg-gold text-black font-black py-4 rounded-xl uppercase tracking-[0.2em]">發佈紀錄</button>
-             </div>
+    <!-- 頁尾 -->
+    <footer class="max-w-6xl mx-auto px-6 py-24 border-t border-white/5 mt-20 text-center">
+        <div class="flex flex-col items-center gap-6">
+            <div>
+                <span class="text-3xl font-black font-montserrat tracking-[0.3em] gold-gradient mb-2 block">EAGROTE</span>
+                <p class="text-zinc-700 text-[10px] uppercase tracking-[0.5em]">Strength · Hope · Unyielding</p>
+            </div>
+            <p class="text-[10px] text-zinc-800 uppercase tracking-[0.4em] mt-4">© 2024 EAGROTE Cloud. All Rights Reserved.</p>
         </div>
-    </section>
+    </footer>
 
+    <!-- 驗證彈窗 & 編輯彈窗 (腳本部分與之前一致) -->
     <div id="login-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/95 backdrop-blur-xl p-6">
-        <div class="bg-zinc-950 p-12 rounded-[3.5rem] border border-white/10 w-full max-w-md text-center">
-            <input type="password" id="admin-pass" class="w-full bg-black border border-zinc-900 p-5 rounded-2xl text-center text-white mb-8 outline-none text-2xl" placeholder="••••••">
-            <button onclick="window.verify()" class="w-full bg-gold text-black font-black py-5 rounded-2xl uppercase">Verify Access</button>
+        <div class="bg-zinc-950 p-12 rounded-[3.5rem] border border-white/10 w-full max-w-md text-center shadow-2xl">
+            <h3 class="gold-gradient text-xl font-black mb-8 uppercase tracking-[0.3em]">Access Security</h3>
+            <input type="password" id="admin-pass" class="w-full bg-black border border-zinc-900 p-5 rounded-2xl text-center text-white mb-8 outline-none focus:border-yellow-500/50 text-2xl tracking-[0.5em]" placeholder="••••••">
+            <button onclick="window.verify()" class="w-full bg-gold text-black font-black py-5 rounded-2xl uppercase tracking-widest">Verify Access</button>
+            <button onclick="window.closeLogin()" class="mt-8 text-zinc-700 text-[10px] uppercase tracking-widest hover:text-zinc-400">Cancel</button>
         </div>
     </div>
 
-    <!-- 3D 渲染腳本 -->
-    <script>
-        let scene, camera, renderer, modelGroup;
-        let isMouseDown = false;
-        let targetRotationX = 0.5, targetRotationY = 0.5;
+    <div id="edit-modal" class="fixed inset-0 z-[110] hidden items-center justify-center bg-black/90 backdrop-blur-2xl p-6">
+        <div class="bg-zinc-950 p-10 rounded-[3rem] border border-yellow-500/20 w-full max-w-xl shadow-2xl overflow-y-auto max-h-[90vh]">
+            <h3 class="gold-gradient text-lg font-black mb-8 uppercase tracking-[0.4em] text-center">Modify Record</h3>
+            <div class="space-y-4">
+                <input type="text" id="edit-title" class="w-full bg-black border border-zinc-800 p-4 rounded-xl text-white outline-none">
+                <select id="edit-cat" class="w-full bg-black border border-zinc-800 p-4 rounded-xl text-white outline-none"></select>
+                <div class="relative group h-48 overflow-hidden rounded-xl border border-zinc-800">
+                    <img id="edit-preview" src="" class="w-full h-full object-cover opacity-50">
+                    <button onclick="document.getElementById('edit-file').click()" class="absolute inset-0 flex items-center justify-center text-[10px] uppercase font-bold text-white/50 group-hover:text-white transition-all">更換照片</button>
+                    <input type="file" id="edit-file" accept="image/*" onchange="window.processImg(this, 'edit')" class="hidden">
+                </div>
+                <textarea id="edit-desc" class="w-full bg-black border border-zinc-800 p-4 rounded-xl h-32 text-white outline-none"></textarea>
+                <div class="flex gap-4 pt-4">
+                    <button onclick="window.saveEdit()" class="flex-1 bg-gold text-black font-black py-4 rounded-xl uppercase tracking-widest">保存更改</button>
+                    <button onclick="window.closeEdit()" class="flex-1 bg-zinc-900 text-zinc-500 font-bold py-4 rounded-xl uppercase tracking-widest">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        function initThree() {
-            const container = document.getElementById('three-container');
-            scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
-            camera.position.z = 15;
-
-            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-            renderer.setSize(container.clientWidth, container.clientHeight);
-            renderer.setPixelRatio(window.devicePixelRatio);
-            container.appendChild(renderer.domElement);
-
-            modelGroup = new THREE.Group();
-            scene.add(modelGroup);
-
-            // 光源
-            const ambient = new THREE.AmbientLight(0xffffff, 0.4);
-            scene.add(ambient);
-            const sun = new THREE.DirectionalLight(0xffffff, 1);
-            sun.position.set(5, 10, 7);
-            scene.add(sun);
-
-            // 預設模型: 畫一個 3D PCB 基板 (當沒有 OBJ 時顯示)
-            const pcbGeo = new THREE.BoxGeometry(6, 4, 0.2);
-            const pcbMat = new THREE.MeshStandardMaterial({ color: 0x061d0b, metalness: 0.5, roughness: 0.2 });
-            const pcb = new THREE.Mesh(pcbGeo, pcbMat);
-            modelGroup.add(pcb);
-
-            // 加上一些金色導線裝飾
-            for(let i=0; i<5; i++) {
-                const line = new THREE.Mesh(new THREE.PlaneGeometry(0.1, 3.5), new THREE.MeshStandardMaterial({color: 0xd4af37, metalness: 0.9}));
-                line.position.set(-2 + i*1, 0, 0.11);
-                modelGroup.add(line);
-            }
-
-            // 滑鼠互動
-            container.addEventListener('mousedown', () => isMouseDown = true);
-            window.addEventListener('mouseup', () => isMouseDown = false);
-            window.addEventListener('mousemove', (e) => {
-                if (isMouseDown) {
-                    targetRotationY += e.movementX * 0.01;
-                    targetRotationX += e.movementY * 0.01;
-                }
-            });
-
-            // 滾輪縮放
-            container.addEventListener('wheel', (e) => {
-                e.preventDefault();
-                camera.position.z += e.deltaY * 0.01;
-                camera.position.z = Math.max(5, Math.min(camera.position.z, 30));
-            }, { passive: false });
-
-            animate();
-        }
-
-        // 讀取本地 OBJ 檔案的邏輯
-        document.getElementById('obj-upload').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            document.getElementById('loading-overlay').style.display = 'flex';
-
-            reader.onload = function(event) {
-                const contents = event.target.result;
-                const loader = new THREE.OBJLoader();
-                const obj = loader.parse(contents);
-                
-                // 清除舊模型
-                while(modelGroup.children.length > 0) modelGroup.remove(modelGroup.children[0]);
-                
-                // 調整模型大小與材質
-                obj.traverse(function(child) {
-                    if (child.isMesh) {
-                        child.material = new THREE.MeshStandardMaterial({ 
-                            color: 0x888888, 
-                            metalness: 0.8, 
-                            roughness: 0.2 
-                        });
-                    }
-                });
-                
-                // 自動縮放與置中
-                const box = new THREE.Box3().setFromObject(obj);
-                const center = box.getCenter(new THREE.Vector3());
-                const size = box.getSize(new THREE.Vector3());
-                const maxDim = Math.max(size.x, size.y, size.z);
-                const scale = 8 / maxDim;
-                obj.scale.set(scale, scale, scale);
-                obj.position.sub(center.multiplyScalar(scale));
-                
-                modelGroup.add(obj);
-                document.getElementById('loading-overlay').style.display = 'none';
-            };
-            reader.readAsText(file);
-        });
-
-        function animate() {
-            requestAnimationFrame(animate);
-            modelGroup.rotation.y += (targetRotationY - modelGroup.rotation.y) * 0.1;
-            modelGroup.rotation.x += (targetRotationX - modelGroup.rotation.x) * 0.1;
-            renderer.render(scene, camera);
-        }
-
-        window.addEventListener('load', initThree);
-    </script>
-
-    <!-- 原本的 Firebase 邏輯模組 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        const app = initializeApp(window.firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+        let db, auth, isAdmin = false;
+        let imgData = null, editImgData = null, editingId = null;
+        let allProjects = [], allCategories = [], currentFilter = 'all', sortNewest = false; 
 
-        // 初始化與同步邏輯 (與你提供的程式碼相同，此處簡略)
+        const COLL_PROJECTS = "eagrote_production_vault";
+        const COLL_CATEGORIES = "eagrote_categories";
+
+        const app = initializeApp(window.firebaseConfig);
+        auth = getAuth(app);
+        db = getFirestore(app);
+
         onAuthStateChanged(auth, (user) => {
-            if (user) {
-                console.log("Cloud Connected");
-                // 同步 Firestore 資料的邏輯...
-            } else {
-                signInAnonymously(auth);
-            }
+            if (user) startSync();
+            else signInAnonymously(auth);
         });
 
-        window.verify = () => {
-            if (document.getElementById('admin-pass').value === "97120719") {
-                document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
-                document.getElementById('login-modal').style.display = 'none';
-            } else { alert("ACCESS DENIED"); }
+        function startSync() {
+            onSnapshot(collection(db, COLL_PROJECTS), (snap) => {
+                allProjects = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                renderAll();
+            }, (err) => console.error(err));
+            onSnapshot(collection(db, COLL_CATEGORIES), (snap) => {
+                allCategories = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                renderCategories();
+            }, (err) => console.error(err));
+        }
+
+        window.toggleSort = () => {
+            sortNewest = !sortNewest;
+            document.getElementById('sort-label').innerText = sortNewest ? "最新靠上" : "最早靠上";
+            renderAll();
         };
 
+        window.setFilter = (catId) => {
+            currentFilter = catId;
+            document.querySelectorAll('.cat-tag').forEach(tag => {
+                tag.classList.toggle('active', tag.dataset.cat === catId);
+            });
+            renderAll();
+        };
+
+        window.addCategory = async () => {
+            const name = document.getElementById('new-cat-name').value.trim();
+            if (!name) return;
+            await addDoc(collection(db, COLL_CATEGORIES), { name, createdAt: Date.now() });
+            document.getElementById('new-cat-name').value = "";
+        };
+
+        window.removeCategory = async (id) => {
+            if (confirm("刪除分類不會刪除作品。確定？")) await deleteDoc(doc(db, COLL_CATEGORIES, id));
+        };
+
+        function renderCategories() {
+            const options = `<option value="">無分類</option>` + allCategories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+            const pCat = document.getElementById('p-cat');
+            const eCat = document.getElementById('edit-cat');
+            if(pCat) pCat.innerHTML = options;
+            if(eCat) eCat.innerHTML = options;
+
+            const filterBar = document.getElementById('filter-bar');
+            if(filterBar) {
+                const allBtn = `<div onclick="window.setFilter('all')" class="cat-tag ${currentFilter==='all'?'active':''} px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest" data-cat="all">All Archive</div>`;
+                const catBtns = allCategories.map(c => `<div onclick="window.setFilter('${c.id}')" class="cat-tag ${currentFilter===c.id?'active':''} px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest" data-cat="${c.id}">${c.name}</div>`).join('');
+                filterBar.innerHTML = allBtn + catBtns;
+            }
+
+            const adminList = document.getElementById('admin-cat-list');
+            if (adminList) {
+                adminList.innerHTML = allCategories.map(c => `
+                    <div class="flex justify-between items-center bg-black/40 p-3 rounded-xl border border-white/5">
+                        <span class="text-xs font-bold text-zinc-300">${c.name}</span>
+                        <button onclick="window.removeCategory('${c.id}')" class="text-[10px] text-red-500/50 hover:text-red-500">REMOVE</button>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function renderAll() {
+            let filtered = currentFilter === 'all' ? allProjects : allProjects.filter(p => p.categoryId === currentFilter);
+            const sorted = filtered.sort((a,b) => sortNewest ? b.time - a.time : a.time - b.time);
+            const list = document.getElementById('list');
+            if (!list) return;
+            if (sorted.length === 0) {
+                list.innerHTML = `<div class="col-span-full py-20 text-center text-zinc-800 border border-dashed border-white/5 rounded-[3rem] uppercase tracking-widest text-[10px]">No records found</div>`;
+                return;
+            }
+            list.innerHTML = sorted.map(i => {
+                const cat = allCategories.find(c => c.id === i.categoryId);
+                return `
+                    <div class="bg-zinc-900/30 border border-white/5 rounded-[2.5rem] overflow-hidden group hover:border-yellow-500/20 transition-all duration-500 flex flex-col">
+                        <div class="h-64 overflow-hidden relative cursor-zoom-in" onclick="window.openLightbox('${i.img}')">
+                            <img src="${i.img}" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all">
+                            <div class="absolute top-4 left-4 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 text-[8px] font-bold text-yellow-500 tracking-widest uppercase">${cat ? cat.name : 'General'}</div>
+                            ${isAdmin ? `<div class="absolute top-4 right-4 flex gap-2"><button onclick="event.stopPropagation(); window.openEdit('${i.id}')" class="bg-yellow-500 text-black text-[10px] px-3 py-1 rounded-full font-black">EDIT</button><button onclick="event.stopPropagation(); window.removeDoc('${i.id}')" class="bg-red-600 text-white text-[10px] px-3 py-1 rounded-full">WIPE</button></div>` : ''}
+                        </div>
+                        <div class="p-8">
+                            <div class="text-[8px] text-zinc-700 uppercase tracking-widest mb-2">${new Date(i.time).toLocaleDateString()}</div>
+                            <h4 class="gold-gradient font-black text-xl tracking-widest uppercase mb-2">${i.title}</h4>
+                            <p class="text-zinc-500 text-xs leading-relaxed font-light line-clamp-3">${i.desc || ''}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        window.upload = async () => {
+            const title = document.getElementById('p-title').value;
+            const categoryId = document.getElementById('p-cat').value;
+            const desc = document.getElementById('p-desc').value;
+            if (!title || !imgData) return;
+            await addDoc(collection(db, COLL_PROJECTS), { title, desc, categoryId, img: imgData, time: Date.now() });
+            document.getElementById('p-title').value = ""; document.getElementById('p-desc').value = ""; imgData = null;
+            document.getElementById('file-label').innerText = "選取媒體";
+        };
+
+        window.processImg = (input, mode) => {
+            const file = input.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const targetSize = 1080; let w = img.width, h = img.height;
+                    if (w > h) { h = (targetSize/w)*h; w = targetSize; } else { w = (targetSize/h)*w; h = targetSize; }
+                    canvas.width = w; canvas.height = h;
+                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                    const res = canvas.toDataURL('image/jpeg', 0.7);
+                    if (mode === 'edit') { editImgData = res; document.getElementById('edit-preview').src = res; }
+                    else { imgData = res; document.getElementById('file-label').innerText = "Ready"; }
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        };
+
+        window.openEdit = (id) => {
+            const item = allProjects.find(i => i.id === id); if (!item) return;
+            editingId = id; editImgData = item.img;
+            document.getElementById('edit-title').value = item.title;
+            document.getElementById('edit-cat').value = item.categoryId || "";
+            document.getElementById('edit-desc').value = item.desc || "";
+            document.getElementById('edit-preview').src = item.img;
+            document.getElementById('edit-modal').style.display = 'flex';
+        };
+
+        window.saveEdit = async () => {
+            await updateDoc(doc(db, COLL_PROJECTS, editingId), {
+                title: document.getElementById('edit-title').value,
+                categoryId: document.getElementById('edit-cat').value,
+                desc: document.getElementById('edit-desc').value,
+                img: editImgData
+            });
+            window.closeEdit();
+        };
+
+        window.closeEdit = () => { document.getElementById('edit-modal').style.display = 'none'; editingId = null; };
+        window.removeDoc = async (id) => { if (confirm("Destroy this data?")) await deleteDoc(doc(db, COLL_PROJECTS, id)); };
         window.openLogin = () => document.getElementById('login-modal').style.display = 'flex';
+        window.closeLogin = () => document.getElementById('login-modal').style.display = 'none';
+        window.openLightbox = (src) => { document.getElementById('lightbox-img').src = src; document.getElementById('lightbox').classList.add('active'); };
+        window.closeLightbox = () => document.getElementById('lightbox').classList.remove('active');
+        window.verify = () => {
+            if (document.getElementById('admin-pass').value === "97120719") {
+                isAdmin = true;
+                document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
+                window.closeLogin(); renderAll();
+            } else { alert("ACCESS DENIED"); }
+        };
     </script>
 </body>
 </html>
