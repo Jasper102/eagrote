@@ -18,6 +18,7 @@
     </script>
 
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700;900&family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Noto Sans TC', sans-serif; background-color: #000; color: #fff; scroll-behavior: smooth; overflow-x: hidden; }
@@ -34,18 +35,24 @@
         
         .glow-bg { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 100%; height: 600px; background: radial-gradient(circle at center, rgba(191, 149, 63, 0.1) 0%, transparent 70%); z-index: -1; pointer-events: none; }
 
+        /* Lightbox & 3D Container */
         #lightbox {
             display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.95);
-            z-index: 200; cursor: zoom-out; align-items: center; justify-content: center;
+            z-index: 200; align-items: center; justify-content: center;
             backdrop-filter: blur(10px); padding: 20px;
         }
-        #lightbox img {
+        #lightbox.active { display: flex; }
+        #lightbox-img {
             max-width: 95%; max-height: 95%; border-radius: 8px;
             box-shadow: 0 0 50px rgba(0,0,0,0.8); transform: scale(0.9);
             transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
-        #lightbox.active { display: flex; }
-        #lightbox.active img { transform: scale(1); }
+        #pcb-canvas-container { 
+            width: 100%; height: 100%; display: none; 
+            cursor: move;
+        }
+        #lightbox.mode-3d #lightbox-img { display: none; }
+        #lightbox.mode-3d #pcb-canvas-container { display: block; }
 
         .cat-tag {
             transition: all 0.3s ease;
@@ -69,8 +76,16 @@
 
     <div class="glow-bg"></div>
 
-    <div id="lightbox" onclick="window.closeLightbox()">
+    <div id="lightbox">
+        <div class="absolute top-6 right-6 z-[210] flex gap-4">
+            <button id="view-mode-btn" onclick="window.toggleViewMode()" class="hidden bg-white/10 hover:bg-white/20 px-4 py-2 rounded-full text-[10px] font-bold tracking-widest uppercase border border-white/20">Switch to 3D View</button>
+            <button onclick="window.closeLightbox()" class="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-full text-[10px] font-bold tracking-widest uppercase border border-white/20">Close</button>
+        </div>
         <img id="lightbox-img" src="" alt="Enlarged view">
+        <div id="pcb-canvas-container"></div>
+        <div id="pcb-loading" class="absolute inset-0 flex items-center justify-center pointer-events-none hidden">
+            <div class="text-yellow-500 font-black tracking-[0.5em] animate-pulse">GENERATING 3D PCB...</div>
+        </div>
     </div>
 
     <!-- 導覽列 -->
@@ -101,19 +116,16 @@
     <!-- 創辦人核心區塊 (Founder Section) -->
     <section id="founder-section" class="max-w-6xl mx-auto px-6 py-24 border-t border-white/5">
         <div class="max-w-5xl mx-auto text-center space-y-20">
-            <!-- 視覺標題 -->
             <div class="space-y-4">
                 <h3 class="text-yellow-500 font-bold tracking-[0.4em] uppercase text-[10px]">The Visionary</h3>
                 <h2 class="text-4xl md:text-6xl font-black font-montserrat gold-gradient uppercase">創辦人核心</h2>
                 <div class="w-16 h-[2px] bg-gold mx-auto mt-4"></div>
             </div>
             
-            <!-- 品牌願景 -->
             <p class="text-zinc-300 leading-relaxed text-lg md:text-2xl font-light italic max-w-3xl mx-auto">
                 「EAGROTE 的誕生源於對數位工藝的純粹追求。我們不只是在建立紀錄，而是在雕琢一段屬於時代的歷史。每一像素、每一行程式碼，都承載著我們對不屈精神的敬意。」
             </p>
 
-            <!-- 個人聯繫資訊：修正後的網格佈局 -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-y-12 md:gap-x-12 py-12 border-y border-white/5">
                 <div class="flex flex-col items-center">
                     <span class="text-[9px] text-zinc-600 uppercase tracking-[0.3em] mb-3">Founder Name</span>
@@ -129,7 +141,6 @@
                 </div>
             </div>
 
-            <!-- 核心指標：分開的容器避免重疊 -->
             <div class="flex flex-wrap justify-center gap-12 md:gap-32">
                 <div class="text-center group">
                     <div class="text-4xl font-black text-white group-hover:gold-gradient transition-all mb-2">2024</div>
@@ -147,7 +158,7 @@
         </div>
     </section>
 
-    <!-- 管理員後台 (保持原樣) -->
+    <!-- 管理員後台 -->
     <section class="max-w-5xl mx-auto px-6 mb-20">
         <div id="admin-panel" class="admin-only space-y-8 p-10 bg-zinc-900/60 rounded-[3rem] border border-yellow-500/30 shadow-2xl backdrop-blur-md">
             <div class="grid md:grid-cols-2 gap-12">
@@ -164,9 +175,12 @@
                     <div class="space-y-4">
                         <input type="text" id="p-title" placeholder="紀錄標題" class="w-full bg-black border border-zinc-800 p-4 rounded-xl text-sm outline-none text-white">
                         <select id="p-cat" class="w-full bg-black border border-zinc-800 p-4 rounded-xl text-sm outline-none text-zinc-400"></select>
-                        <div class="flex gap-4">
-                            <button onclick="document.getElementById('p-file').click()" class="flex-1 bg-zinc-800/50 p-4 rounded-xl text-zinc-400 text-xs border border-dashed border-zinc-700" id="file-label">選取媒體</button>
+                        <div class="grid grid-cols-2 gap-4">
+                            <button onclick="document.getElementById('p-file').click()" class="bg-zinc-800/50 p-4 rounded-xl text-zinc-400 text-[10px] border border-dashed border-zinc-700 uppercase" id="file-label">選取照片</button>
                             <input type="file" id="p-file" accept="image/*" onchange="window.processImg(this, 'new')" class="hidden">
+                            
+                            <button onclick="document.getElementById('p-gerber').click()" class="bg-yellow-500/10 p-4 rounded-xl text-yellow-500 text-[10px] border border-dashed border-yellow-500/30 uppercase" id="gerber-label">上傳 PCB Gerber (ZIP/TXT)</button>
+                            <input type="file" id="p-gerber" accept=".zip,.txt,.gbr" onchange="window.handleGerber(this)" class="hidden">
                         </div>
                         <textarea id="p-desc" placeholder="詳細內容描述..." class="w-full bg-black border border-zinc-800 p-4 rounded-xl h-24 text-sm outline-none text-white"></textarea>
                         <button onclick="window.upload()" class="w-full bg-gold text-black font-black py-4 rounded-xl uppercase tracking-[0.2em] text-sm hover:scale-[1.01] transition-all">發佈至雲端</button>
@@ -176,7 +190,7 @@
         </div>
     </section>
 
-    <!-- 雲端紀錄列表控制區 (保持原樣) -->
+    <!-- 雲端紀錄列表控制區 -->
     <section class="max-w-6xl mx-auto px-6 py-10">
         <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-6">
             <div class="flex-1">
@@ -201,7 +215,7 @@
         </div>
     </footer>
 
-    <!-- 驗證彈窗 & 編輯彈窗 (腳本部分與之前一致) -->
+    <!-- 驗證彈窗 & 編輯彈窗 -->
     <div id="login-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/95 backdrop-blur-xl p-6">
         <div class="bg-zinc-950 p-12 rounded-[3.5rem] border border-white/10 w-full max-w-md text-center shadow-2xl">
             <h3 class="gold-gradient text-xl font-black mb-8 uppercase tracking-[0.3em]">Access Security</h3>
@@ -238,10 +252,14 @@
 
         let db, auth, isAdmin = false;
         let imgData = null, editImgData = null, editingId = null;
+        let pcbGerberData = null; // 存放 Gerber 模擬資料
         let allProjects = [], allCategories = [], currentFilter = 'all', sortNewest = false; 
 
         const COLL_PROJECTS = "eagrote_production_vault";
         const COLL_CATEGORIES = "eagrote_categories";
+
+        // 3D PCB Vars
+        let scene, camera, renderer, pcbModel, animationId;
 
         const app = initializeApp(window.firebaseConfig);
         auth = getAuth(app);
@@ -262,6 +280,19 @@
                 renderCategories();
             }, (err) => console.error(err));
         }
+
+        // PCB Gerber Handler
+        window.handleGerber = (input) => {
+            const file = input.files[0];
+            if (!file) return;
+            // 這裡模擬解析 Gerber 檔名與基本結構
+            document.getElementById('gerber-label').innerText = `PCB LOADED: ${file.name}`;
+            pcbGerberData = {
+                fileName: file.name,
+                type: "custom_pcb",
+                color: "#1a4d2e" // 預設深綠色阻焊層
+            };
+        };
 
         window.toggleSort = () => {
             sortNewest = !sortNewest;
@@ -324,11 +355,15 @@
             }
             list.innerHTML = sorted.map(i => {
                 const cat = allCategories.find(c => c.id === i.categoryId);
+                const has3D = i.pcbData ? true : false;
                 return `
                     <div class="bg-zinc-900/30 border border-white/5 rounded-[2.5rem] overflow-hidden group hover:border-yellow-500/20 transition-all duration-500 flex flex-col">
-                        <div class="h-64 overflow-hidden relative cursor-zoom-in" onclick="window.openLightbox('${i.img}')">
+                        <div class="h-64 overflow-hidden relative cursor-zoom-in" onclick="window.openLightbox('${i.img}', ${JSON.stringify(i.pcbData || null).replace(/"/g, '&quot;')})">
                             <img src="${i.img}" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all">
-                            <div class="absolute top-4 left-4 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 text-[8px] font-bold text-yellow-500 tracking-widest uppercase">${cat ? cat.name : 'General'}</div>
+                            <div class="absolute top-4 left-4 flex gap-2">
+                                <div class="bg-black/60 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 text-[8px] font-bold text-yellow-500 tracking-widest uppercase">${cat ? cat.name : 'General'}</div>
+                                ${has3D ? `<div class="bg-blue-500/80 px-3 py-1 rounded-full text-[8px] font-bold text-white tracking-widest uppercase">3D PCB Ready</div>` : ''}
+                            </div>
                             ${isAdmin ? `<div class="absolute top-4 right-4 flex gap-2"><button onclick="event.stopPropagation(); window.openEdit('${i.id}')" class="bg-yellow-500 text-black text-[10px] px-3 py-1 rounded-full font-black">EDIT</button><button onclick="event.stopPropagation(); window.removeDoc('${i.id}')" class="bg-red-600 text-white text-[10px] px-3 py-1 rounded-full">WIPE</button></div>` : ''}
                         </div>
                         <div class="p-8">
@@ -346,9 +381,22 @@
             const categoryId = document.getElementById('p-cat').value;
             const desc = document.getElementById('p-desc').value;
             if (!title || !imgData) return;
-            await addDoc(collection(db, COLL_PROJECTS), { title, desc, categoryId, img: imgData, time: Date.now() });
-            document.getElementById('p-title').value = ""; document.getElementById('p-desc').value = ""; imgData = null;
-            document.getElementById('file-label').innerText = "選取媒體";
+            
+            await addDoc(collection(db, COLL_PROJECTS), { 
+                title, 
+                desc, 
+                categoryId, 
+                img: imgData, 
+                pcbData: pcbGerberData, // 存入 PCB 仿真資料
+                time: Date.now() 
+            });
+
+            document.getElementById('p-title').value = ""; 
+            document.getElementById('p-desc').value = ""; 
+            document.getElementById('gerber-label').innerText = "上傳 PCB Gerber (ZIP/TXT)";
+            imgData = null; 
+            pcbGerberData = null;
+            document.getElementById('file-label').innerText = "選取照片";
         };
 
         window.processImg = (input, mode) => {
@@ -369,6 +417,113 @@
                 img.src = e.target.result;
             };
             reader.readAsDataURL(file);
+        };
+
+        // --- 3D PCB Logic ---
+        let currentPCBData = null;
+        window.openLightbox = (src, pcbData) => {
+            const lb = document.getElementById('lightbox');
+            const viewBtn = document.getElementById('view-mode-btn');
+            document.getElementById('lightbox-img').src = src;
+            lb.classList.add('active');
+            lb.classList.remove('mode-3d');
+            
+            currentPCBData = pcbData;
+            if (pcbData) {
+                viewBtn.classList.remove('hidden');
+            } else {
+                viewBtn.classList.add('hidden');
+            }
+        };
+
+        window.toggleViewMode = () => {
+            const lb = document.getElementById('lightbox');
+            if (lb.classList.contains('mode-3d')) {
+                lb.classList.remove('mode-3d');
+                document.getElementById('view-mode-btn').innerText = "Switch to 3D View";
+                stop3D();
+            } else {
+                lb.classList.add('mode-3d');
+                document.getElementById('view-mode-btn').innerText = "Switch to Photo View";
+                init3DPCB(currentPCBData);
+            }
+        };
+
+        function init3DPCB(data) {
+            const container = document.getElementById('pcb-canvas-container');
+            const loading = document.getElementById('pcb-loading');
+            loading.classList.remove('hidden');
+            
+            // Cleanup old
+            while(container.firstChild) container.removeChild(container.firstChild);
+
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            container.appendChild(renderer.domElement);
+
+            // Lights
+            const ambient = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambient);
+            const point = new THREE.PointLight(0xffffff, 1);
+            point.position.set(10, 10, 10);
+            scene.add(point);
+
+            // PCB Geometry (The "Board")
+            const geometry = new THREE.BoxGeometry(4, 3, 0.1);
+            const material = new THREE.MeshStandardMaterial({ 
+                color: data.color || 0x1a4d2e, 
+                roughness: 0.3,
+                metalness: 0.2
+            });
+            pcbModel = new THREE.Mesh(geometry, material);
+            scene.add(pcbModel);
+
+            // Fake Copper Traces (Simulating Gerber Data)
+            for(let i=0; i<15; i++) {
+                const traceGeo = new THREE.PlaneGeometry(Math.random()*2, 0.05);
+                const traceMat = new THREE.MeshStandardMaterial({ color: 0xb8860b, metalness: 1, roughness: 0.2 });
+                const trace = new THREE.Mesh(traceGeo, traceMat);
+                trace.position.set(Math.random()*3 - 1.5, Math.random()*2 - 1, 0.051);
+                trace.rotation.z = Math.random() * Math.PI;
+                pcbModel.add(trace);
+            }
+
+            camera.position.z = 8;
+
+            // Interaction
+            let isDragging = false, prevMouse = {x:0, y:0};
+            container.onmousedown = (e) => { isDragging = true; prevMouse = {x: e.clientX, y: e.clientY}; };
+            window.onmouseup = () => isDragging = false;
+            window.onmousemove = (e) => {
+                if(!isDragging) return;
+                const dx = e.clientX - prevMouse.x;
+                const dy = e.clientY - prevMouse.y;
+                pcbModel.rotation.y += dx * 0.01;
+                pcbModel.rotation.x += dy * 0.01;
+                prevMouse = {x: e.clientX, y: e.clientY};
+            };
+
+            function animate() {
+                animationId = requestAnimationFrame(animate);
+                if(!isDragging) {
+                    pcbModel.rotation.y += 0.005;
+                }
+                renderer.render(scene, camera);
+            }
+
+            loading.classList.add('hidden');
+            animate();
+        }
+
+        function stop3D() {
+            if (animationId) cancelAnimationFrame(animationId);
+        }
+
+        window.closeLightbox = () => { 
+            document.getElementById('lightbox').classList.remove('active'); 
+            stop3D();
         };
 
         window.openEdit = (id) => {
@@ -395,8 +550,6 @@
         window.removeDoc = async (id) => { if (confirm("Destroy this data?")) await deleteDoc(doc(db, COLL_PROJECTS, id)); };
         window.openLogin = () => document.getElementById('login-modal').style.display = 'flex';
         window.closeLogin = () => document.getElementById('login-modal').style.display = 'none';
-        window.openLightbox = (src) => { document.getElementById('lightbox-img').src = src; document.getElementById('lightbox').classList.add('active'); };
-        window.closeLightbox = () => document.getElementById('lightbox').classList.remove('active');
         window.verify = () => {
             if (document.getElementById('admin-pass').value === "97120719") {
                 isAdmin = true;
@@ -404,6 +557,14 @@
                 window.closeLogin(); renderAll();
             } else { alert("ACCESS DENIED"); }
         };
+
+        window.addEventListener('resize', () => {
+            if (renderer && camera) {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+        });
     </script>
 </body>
 </html>
